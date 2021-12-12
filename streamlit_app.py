@@ -1,14 +1,16 @@
-"""My awesome streamlit app
+"""Spotifire
 
-# TODO Create docstring
+This module runs a stand-alone streamlit data app that displays interactive analysis of
+my spotify data.
 
 Example:
-    Examples can be given using either the ``Example`` or ``Examples``
-    sections. Sections support any reStructuredText formatting, including
-    literal blocks::
+    To run the app simply run the following in an
+    environment that has streamlit::
 
-        $ streamlit streamlit_app.py
+        $ streamlit run streamlit_app.py
 
+TODOs:
+    * Module todos
 """
 import os
 import urllib
@@ -23,6 +25,10 @@ from wordcloud import WordCloud
 
 
 def main():
+    """
+    Backbone of app. Containts the pointer to the different
+    pages.
+    """
     # Set contenct width
     st.set_page_config(page_title="Spotifire", layout="wide", page_icon=":fire:")
 
@@ -33,12 +39,9 @@ def main():
     for filename in EXTERNAL_DEPENDENCIES.keys():
         download_file(filename)
 
-    col1, col2, col3 = st.sidebar.columns([1, 1, 1])
+    _, col2, _ = st.sidebar.columns([1, 1, 1])
     # Smbra logo in sidebar
-    col2.image(
-        "https://raw.githubusercontent.com/Strandgaard96/spotify-dashboard/master/images/sombra.png",
-        width=120,
-    )
+    col2.image(REPO_URL_ROOT + "images/sombra.png", width=120)
 
     # Create sidebar for selecting app pages
     st.sidebar.title("Select an app mode below: ")
@@ -58,13 +61,21 @@ def main():
 
     # What to put under the sidebar
     st.sidebar.markdown(
-        '<h4>Made in &nbsp<img src="https://streamlit.io/images/brand/streamlit-mark-color.png" alt="Streamlit logo" height="16">&nbsp by <a href="https://github.com/Strandgaard96">Strandgaard96</a></h4>',
+        '<h4>Made in &nbsp<img src="https://streamlit.io/images/brand/streamlit-mark-color.png"\
+         alt="Streamlit logo" \
+         height="16">&nbsp by <a href="https://github.com/Strandgaard96">Strandgaard96</a></h4>',
         unsafe_allow_html=True,
     )
 
 
 # This file downloader demonstrates Streamlit animation.
 def download_file(file_path):
+    """
+    Downloads files specified by EXTERNAL_DEPENDENCIES to current directory.
+    The keys are the filenames of the downloaded files.
+    :param file_path:
+    :return: None
+    """
     # Don't download the file twice. (If possible, verify the download using
     # the file length.)
     if os.path.exists(file_path):
@@ -110,17 +121,18 @@ def download_file(file_path):
 @st.cache
 def generate_wordcloud(music_df=None):
     "Wordcloud generator"
-    # Inspo from : https://oleheggli.medium.com/easily-analyse-audio-features-from-spotify-playlists-part-3-ec00a55e87e4
+    # Inspo from :
+    # https://oleheggli.medium.com/easily-analyse-audio-features-from-spotify-playlists-part-3-ec00a55e87e4
 
     # Select first the Finnish genres
     genres = music_df["genre"]
 
     # strip and replace bits in the Genre string
     genres_long = []
-    for thisTrack in genres:
-        with open("genres.txt", "a") as f:
-            print(list(thisTrack.split("/")), file=f)
-        genres_long.extend(list(thisTrack.split("/")))
+    for this_track in genres:
+        with open("genres.txt", "a", encoding="UTF-8") as file:
+            print(list(this_track.split("/")), file=file)
+        genres_long.extend(list(this_track.split("/")))
 
     genres_count = Counter(genres_long)
     genre_wordcloud = WordCloud(
@@ -137,13 +149,17 @@ def generate_wordcloud(music_df=None):
 
 @st.cache
 def get_wordcloud_image():
+    """Get wordcloud image from repo"""
     image = Image.open("data/cloud.png")
     return image
 
 
-# This is the main app app itself, which appears when the user selects
-# "Run the app".
 def run_the_app():
+    """
+    Runs the data analysis
+    :return: None
+    """
+
     # To make Streamlit fast, st.cache allows us to reuse computation across runs.
     # In this common pattern, we download data from an endpoint only once.
     @st.cache
@@ -232,6 +248,7 @@ def show_audio_features(music_df=None):
 # Download a single file and make its content available as a string.
 @st.cache(show_spinner=False)
 def get_file_content_as_string(path):
+    """Get markdown file from repo and return as string"""
     url = (
         "https://raw.githubusercontent.com/Strandgaard96/spotify-dashboard/master/"
         + path
@@ -240,8 +257,10 @@ def get_file_content_as_string(path):
     return response.read().decode("utf-8")
 
 
-# Path to the Streamlit public S3 bucke
-DATA_URL_ROOT = "some_path"
+# Path to the repo image folder
+REPO_URL_ROOT = (
+    "https://raw.githubusercontent.com/Strandgaard96/spotify-dashboard/master/"
+)
 
 # External files to download.
 EXTERNAL_DEPENDENCIES = {}
