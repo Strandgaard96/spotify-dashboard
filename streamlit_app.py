@@ -125,14 +125,11 @@ def generate_wordcloud(music_df=None):
     # Inspo from :
     # https://oleheggli.medium.com/easily-analyse-audio-features-from-spotify-playlists-part-3-ec00a55e87e4
 
-    # Select first the Finnish genres
     genres = music_df["genre"]
 
     # strip and replace bits in the Genre string
     genres_long = []
     for this_track in genres:
-        with open("genres.txt", "a", encoding="UTF-8") as file:
-            print(list(this_track.split("/")), file=file)
         genres_long.extend(list(this_track.split("/")))
 
     genres_count = Counter(genres_long)
@@ -198,6 +195,18 @@ def run_the_app():
     st.image(image)
 
 
+def get_altair_histogram(data = None):
+    """
+    Create a histogram of the most common genres
+    :param data:
+    :return:
+    """
+    hist = data
+    # TODO create chart
+
+    return hist
+
+
 def show_audio_features(music_df=None):
     """
     Take the music dataframe and create ui element that user can interact with
@@ -223,27 +232,41 @@ def show_audio_features(music_df=None):
         data = data.loc[tracks]
         st.write("#### Chosen songs:", data.sort_index())
         st.write("---")
+        # TODO explain features
+        st.markdown("""
+        **Features explained:**
+       
+        """)
 
         data = data.T.reset_index()
         data = pd.melt(data, id_vars=["index"]).rename(
             columns={"index": "Feature", "value": "Value", "track_name": "Song"}
         )
-        chart = (
-            alt.Chart(data)
+        chart_genre_hist= get_altair_histogram(music_df['genre'])
+        chart_features  = get_audiofeature_chart(data)
+
+        main_col1,main_col2 = st.columns([1, 1])
+        main_col1.altair_chart(chart_features, use_container_width=True)
+        #main_col2.altair_chart(chart_genre_hist, use_container_width=True)
+
+
+def get_audiofeature_chart(data):
+    chart_features = (
+        alt.Chart(data)
             .mark_area(opacity=0.3)
             .encode(
-                x="Feature",
-                y=alt.Y("Value", stack=None, scale=alt.Scale(domain=[0, 1])),
-                color="Song",
-            )
+            x="Feature",
+            y=alt.Y("Value", stack=None, scale=alt.Scale(domain=[0, 1])),
+            color="Song",
+        )
             .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
             .properties(title="Audio features", height=500)
             .configure_title(
-                fontSize=20,
-            )
-            .configure_legend(symbolSize=250, titleFontSize=25, labelFontSize=25)
+            fontSize=20,
         )
-        st.altair_chart(chart, use_container_width=True)
+            .configure_legend(symbolSize=250, titleFontSize=25, labelFontSize=25)
+    )
+    return chart_features
 
 
 # Download a single file and make its content available as a string.
