@@ -49,6 +49,7 @@ def main():
         "Choose the app mode",
         ["Show instructions", "Run the app", "Show the source code"],
     )
+
     if app_mode == "Show instructions":
         st.sidebar.success('To continue select "Run the app".')
     elif app_mode == "Show the source code":

@@ -7,4 +7,4 @@ More features will be added in the future :smiley:!
 
 Select **Run the app** in the sidebar to see som cool data!
 
-[comment]: <> (Need more extensive intro page)
+[//]: # (Need more extensive intro page)
