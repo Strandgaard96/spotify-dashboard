@@ -67,8 +67,8 @@ def analyze_playlist(creator, playlist_id, sp):
                 except:
                     thisGenres = []
                 if thisGenres == []:
-                    thisGenres = ['unknown']
-            playlist_features["genre"] = '/'.join(thisGenres)
+                    thisGenres = ["unknown"]
+            playlist_features["genre"] = "/".join(thisGenres)
 
             # To get the top artists, the scope need changing :
             # https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-read-private
