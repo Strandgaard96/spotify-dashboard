@@ -1,14 +1,27 @@
+"""
+Module responsible for handling spotify interaction.
+"""
 import numpy as np
 import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
+# Private file with sensitive information
 import config
 
 
-# Inspiration taken from this: https://www.linkedin.com/pulse/extracting-your-fav-playlist-info-spotifys-api-samantha-jones/
+# Inspiration taken from this:
+# https://www.linkedin.com/pulse/extracting-your-fav-playlist-info-spotifys-api-samantha-jones/
 def analyze_playlist(creator, playlist_id, sp):
-    # Create empty dataframe
+    """
+    Extract relevant track data for given playlist id
+    :param creator: str
+    :param playlist_id : str
+    :param sp: Spotify authentification manager : class
+    :return: playlist : DataFrame
+    """
+
+    # Create empty dataframe with relevant columns
     playlist_features_list = [
         "artist",
         "genre",
@@ -30,7 +43,7 @@ def analyze_playlist(creator, playlist_id, sp):
     ]
     playlist_df = pd.DataFrame(columns=playlist_features_list)
 
-    # Create empty dict
+    # Create empty dict for holding extracted features
     playlist_features = {}
 
     # Get the number of tracks in the playlist
@@ -38,7 +51,8 @@ def analyze_playlist(creator, playlist_id, sp):
     # Create loop values based on playlist length
     offsets = np.arange(0, playlist_length + (100 - playlist_length % 100), 100)
 
-    # Loop through every track in the playlist, extract features and append the features to the playlist d
+    # Loop through every track in the playlist,
+    # extract features and append the features to the playlist.
     for offset in offsets:
         playlist = sp.user_playlist_tracks(
             creator, playlist_id=playlist_id, limit="100", offset=offset
@@ -57,18 +71,23 @@ def analyze_playlist(creator, playlist_id, sp):
                 playlist_features[feature] = audio_features[feature]
 
             # Get artist genre
-            thisArtistId = track["track"]["artists"][0]["id"]
-            if thisArtistId == None:
-                thisGenres = "[unknown]"
+            this_artist_id = track["track"]["artists"][0]["id"]
+            if this_artist_id is None:
+                this_genres = ["unknown"]
             else:
                 try:
-                    thisArtistInfo = sp.artist(thisArtistId)
-                    thisGenres = thisArtistInfo["genres"]
-                except:
-                    thisGenres = []
-                if thisGenres == []:
-                    thisGenres = ["unknown"]
-            playlist_features["genre"] = "/".join(thisGenres)
+                    this_artist_info = sp.artist("123")
+                    this_genres = this_artist_info["genres"]
+                except spotipy.SpotifyException as exception:
+                    print(exception)
+                    print(
+                        "Experienced an error when getting artist. Likely invalid artist id."
+                    )
+                    this_genres = []
+                if this_genres == []:
+                    this_genres = ["unknown"]
+            # Convert list of genres to string for storage in dataframe
+            playlist_features["genre"] = "/".join(this_genres)
 
             # To get the top artists, the scope need changing :
             # https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-read-private
@@ -95,8 +114,11 @@ def main():
         )
     )
 
+    # Playlist id to download data for
     playlist_id = "3PDP5gjPxjiXfYbgf8ll9C"
     playlist_df = analyze_playlist(creator="dansken02", playlist_id=playlist_id, sp=sp)
+
+    # Save dataframe
     playlist_df.to_csv("data/$.csv", index=False)
 
 
