@@ -4,10 +4,9 @@ Module responsible for handling spotify interaction.
 import numpy as np
 import pandas as pd
 import spotipy
+# Not sure how this import will affect the app
+import streamlit as st
 from spotipy.oauth2 import SpotifyOAuth
-
-# Private file with sensitive information
-import config
 
 
 # Inspiration taken from this:
@@ -76,7 +75,7 @@ def analyze_playlist(creator, playlist_id, sp):
                 this_genres = ["unknown"]
             else:
                 try:
-                    this_artist_info = sp.artist("123")
+                    this_artist_info = sp.artist(this_artist_id)
                     this_genres = this_artist_info["genres"]
                 except spotipy.SpotifyException as exception:
                     print(exception)
@@ -107,9 +106,9 @@ def main():
 
     sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
-            client_id=config.CLIENT_ID,
-            client_secret=config.CLIENT_SECRET,
-            redirect_uri=config.REDIRECT_URI,
+            client_id=st.secrets["CLIENT_ID"],
+            client_secret=st.secrets["CLIENT_SECRET"],
+            redirect_uri=st.secrets["REDIRECT_URI"],
             scope=scope,
         )
     )
