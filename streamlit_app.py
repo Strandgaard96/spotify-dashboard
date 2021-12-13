@@ -24,6 +24,10 @@ from matplotlib import cm
 from wordcloud import WordCloud
 
 
+# Example data for debugging and development
+# from vega_datasets import data as data_vega
+
+
 def main():
     """
     Backbone of app. Containts the pointer to the different
@@ -119,20 +123,33 @@ def download_file(file_path):
             progress_bar.empty()
 
 
+def get_genre_count(genres_df=None):
+    """
+    Utility method to extract genres from the dataframe into list
+    :return: list : genres DataFrame: df
+    """
+
+    # Get all genres as long list
+    genres_long = []
+    for this_track in genres_df:
+        genres_long.extend(list(this_track.split("/")))
+
+    # Count the occurrence of each genre
+    genres_count = Counter(genres_long)
+    df = (
+        pd.DataFrame.from_dict(genres_count, orient="index")
+        .reset_index()
+        .rename(columns={"index": "genre", 0: "count"})
+    )
+    return genres_count, df
+
+
 @st.cache
-def generate_wordcloud(music_df=None):
+def generate_wordcloud(genres_df=None):
     "Wordcloud generator"
     # Inspo from :
     # https://oleheggli.medium.com/easily-analyse-audio-features-from-spotify-playlists-part-3-ec00a55e87e4
 
-    genres = music_df["genre"]
-
-    # strip and replace bits in the Genre string
-    genres_long = []
-    for this_track in genres:
-        genres_long.extend(list(this_track.split("/")))
-
-    genres_count = Counter(genres_long)
     genre_wordcloud = WordCloud(
         stopwords="unknown",
         height=500,
@@ -141,6 +158,7 @@ def generate_wordcloud(music_df=None):
         colormap=cm.inferno,
         include_numbers=True,
     )
+    genres_count, _ = get_genre_count(genres_df=genres_df)
     genre_wordcloud.generate_from_frequencies(genres_count)
     genre_wordcloud.to_file("data/cloud.png")
 
@@ -181,28 +199,71 @@ def run_the_app():
     st.title("Audio feature analysis")
     st.markdown("This page contains some simple visualizations of the playlist data")
     # Uncomment these lines to peek at these DataFrames.
-    st.write("#### Here we print the five first songs in the data ", music_df.head(5))
+    st.write(
+        "#### Here we print the five first songs in the data ",
+        music_df.head(5)[
+            [
+                "artist",
+                "danceability",
+                "energy",
+                "instrumentalness",
+                "liveness",
+                "speechiness",
+                "valence",
+            ]
+        ],
+    )
 
-    # Show audio feature analysis
-    show_audio_features(music_df=music_df)
-
-    generate_wordcloud(music_df=music_df)
-
+    # Generate wordcloud and obtain
+    generate_wordcloud(genres_df=music_df["genre"])
     image = get_wordcloud_image()
+
+    # Get histogram chart opbject
+    count, df = get_genre_count(genres_df=music_df["genre"])
+    df = df.nlargest(10, "count").sort_values(by="count", ascending=False)
+    chart_genre_hist = get_altair_histogram(df)
+
+    # Get audio feature analysis
+    chart_features = show_audio_features(music_df=music_df)
+
+    # Print both obtained charts
+    main_col1, main_col2 = st.columns([1, 1])
+    main_col1.altair_chart(chart_features, use_container_width=True)
+    main_col2.altair_chart(chart_genre_hist, use_container_width=True)
+
+    # Print wordcloud analysis
     st.write("---")
     st.markdown("### What genres does the playlist consist of?")
     st.markdown("Wordcloud showing the genre distribution:")
     st.image(image)
 
 
-def get_altair_histogram(data = None):
+def get_altair_histogram(data=None):
     """
     Create a histogram of the most common genres
     :param data:
-    :return:
+    :return: alt.Chart : hist
     """
-    hist = data
-    # TODO create chart
+
+    hist = (
+        alt.Chart(data)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                "genre",
+                axis=alt.Axis(title="Genre"),
+                sort=alt.EncodingSortField(order="ascending"),
+            ),
+            y=alt.Y("count", axis=alt.Axis(title="Counts")),
+        )
+        .properties(width=200, height=600, title="Top 10 genres")
+        .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
+        .configure_title(
+            fontSize=20,
+        )
+    )
+    # Can be added to enable scroll and zoom in the chart
+    # .interactive()
 
     return hist
 
@@ -230,41 +291,41 @@ def show_audio_features(music_df=None):
     else:
         data = music_df[audio_features]
         data = data.loc[tracks]
+
         st.write("#### Chosen songs:", data.sort_index())
         st.write("---")
         # TODO explain features
-        st.markdown("""
+        st.markdown(
+            """
         **Features explained:**
        
-        """)
+        """
+        )
 
         data = data.T.reset_index()
         data = pd.melt(data, id_vars=["index"]).rename(
             columns={"index": "Feature", "value": "Value", "track_name": "Song"}
         )
-        chart_genre_hist= get_altair_histogram(music_df['genre'])
-        chart_features  = get_audiofeature_chart(data)
+        chart_features = get_audiofeature_chart(data)
 
-        main_col1,main_col2 = st.columns([1, 1])
-        main_col1.altair_chart(chart_features, use_container_width=True)
-        #main_col2.altair_chart(chart_genre_hist, use_container_width=True)
+        return chart_features
 
 
 def get_audiofeature_chart(data):
     chart_features = (
         alt.Chart(data)
-            .mark_area(opacity=0.3)
-            .encode(
+        .mark_area(opacity=0.3)
+        .encode(
             x="Feature",
             y=alt.Y("Value", stack=None, scale=alt.Scale(domain=[0, 1])),
             color="Song",
         )
-            .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
-            .properties(title="Audio features", height=500)
-            .configure_title(
+        .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
+        .properties(title="Audio features", height=500)
+        .configure_title(
             fontSize=20,
         )
-            .configure_legend(symbolSize=250, titleFontSize=25, labelFontSize=25)
+        .configure_legend(symbolSize=250, titleFontSize=25, labelFontSize=25)
     )
     return chart_features
 
