@@ -15,6 +15,7 @@ TODOs:
 import os
 import urllib
 from collections import Counter
+from collections import defaultdict
 
 import altair as alt
 import pandas as pd
@@ -131,16 +132,27 @@ def get_genre_count(genres_df=None):
 
     # Get all genres as long list
     genres_long = []
-    for this_track in genres_df:
+    for this_track in genres_df['genre']:
         genres_long.extend(list(this_track.split("/")))
 
     # Count the occurrence of each genre
     genres_count = Counter(genres_long)
+
+    # Genres/artist dicts
+    genre_artists = defaultdict(list)
+
+    # Fill in artists that have a genre. Super inefficient
+    for genre in genres_count:
+        for index,row in genres_df.iterrows():
+            if genre in row['genre'].split("/"):
+                genre_artists[genre].append(row['artist'])
+
     df = (
         pd.DataFrame.from_dict(genres_count, orient="index")
         .reset_index()
-        .rename(columns={"index": "genre", 0: "count"})
+        .rename(columns={"index": "genre", 0: "count", 1: "artists"})
     )
+    df['artists'] =df['genre'].map(genre_artists)
     return genres_count, df
 
 
@@ -226,7 +238,7 @@ def run_the_app():
     image = get_wordcloud_image(playlist_name=playlist_name)
 
     # Get histogram chart opbject
-    _, df = get_genre_count(genres_df=music_df["genre"])
+    _, df = get_genre_count(genres_df=music_df[["genre",'artist']])
     df = df.nlargest(10, "count").sort_values(by="count", ascending=False)
     chart_genre_hist = get_altair_histogram(df)
 
@@ -256,6 +268,8 @@ def get_altair_histogram(data=None):
     :param data:
     :return: alt.Chart : hist
     """
+    for elem in data['artists']:
+        data['artists']="-".join(elem[0:5])
 
     hist = (
         alt.Chart(data)
@@ -267,6 +281,7 @@ def get_altair_histogram(data=None):
                 sort=alt.EncodingSortField(order="ascending"),
             ),
             y=alt.Y("count", axis=alt.Axis(title="Counts")),
+            color='genre',
         )
         .properties(width=200, height=500, title="Top 10 genres")
         .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
@@ -295,7 +310,7 @@ def show_audio_features(music_df=None):
         "valence",
     ]
     tracks = st.multiselect(
-        "Choose track to visualize",
+        "Choose tracks to visualize",
         list(music_df.index),
         [music_df.index[0], music_df.index[1]],
     )
