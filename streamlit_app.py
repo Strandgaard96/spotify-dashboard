@@ -45,7 +45,7 @@ def main():
 
     _, col2, _ = st.sidebar.columns([1, 1, 1])
     # Smbra logo in sidebar
-    col2.image(REPO_URL_ROOT + "images/sombra.png", width=120)
+    col2.image("images/sombra.png", width=120)
 
     # Create sidebar for selecting app pages
     st.sidebar.title("Select an app mode below: ")
@@ -144,8 +144,7 @@ def get_genre_count(genres_df=None):
     return genres_count, df
 
 
-@st.cache
-def generate_wordcloud(genres_df=None):
+def generate_wordcloud(genres_df=None, playlist_name=None):
     "Wordcloud generator"
     # Inspo from :
     # https://oleheggli.medium.com/easily-analyse-audio-features-from-spotify-playlists-part-3-ec00a55e87e4
@@ -160,13 +159,13 @@ def generate_wordcloud(genres_df=None):
     )
     genres_count, _ = get_genre_count(genres_df=genres_df)
     genre_wordcloud.generate_from_frequencies(genres_count)
-    genre_wordcloud.to_file("data/cloud.png")
+    genre_wordcloud.to_file(f"data/{playlist_name}.png")
 
 
 @st.cache
-def get_wordcloud_image():
+def get_wordcloud_image(playlist_name=None):
     """Get wordcloud image from repo"""
-    image = Image.open("data/cloud.png")
+    image = Image.open(f"data/{playlist_name}.png")
     return image
 
 
@@ -188,16 +187,23 @@ def run_the_app():
         df = pd.read_csv(data)
         return df.set_index("track_name")
 
-    # An amazing property of st.cached functions is that you can pipe them into
-    # one another to form a computation DAG (directed acyclic graph). Streamlit
-    # recomputes only whatever subset is required to get the right answer!
-    music_df = get_dataframe(
-        "https://raw.githubusercontent.com/Strandgaard96/spotify-dashboard/master/data/$.csv"
-    )
+    # Variable for the name of the playlist.
+    # The same name used for the data file and wordcloud image
+    # Should be extended to be a dynamic variable through user input.
+    playlist_name = "$"
+
+    music_df = get_dataframe(f"data/{playlist_name}.csv")
 
     # Set a headline for the current view
-    st.title("Audio feature analysis")
-    st.markdown("This page contains some simple visualizations of the playlist data")
+    st.title("Welcome to the audio feature analysis page")
+    st.write(
+        """
+        Here you will find different analysis and visualizations of the playlist data.
+        
+        The user is free to interact with some of these visualizations and 
+        chose specific tracks to show analysis for.
+        """
+    )
     # Uncomment these lines to peek at these DataFrames.
     st.write(
         "#### Here we print the five first songs in the data ",
@@ -214,12 +220,13 @@ def run_the_app():
         ],
     )
 
-    # Generate wordcloud and obtain
-    generate_wordcloud(genres_df=music_df["genre"])
-    image = get_wordcloud_image()
+    # Generate wordcloud if one does not exist for the current playlist
+    if not os.path.isfile(f"data/{playlist_name}.png"):
+        generate_wordcloud(genres_df=music_df["genre"], playlist_name=playlist_name)
+    image = get_wordcloud_image(playlist_name=playlist_name)
 
     # Get histogram chart opbject
-    count, df = get_genre_count(genres_df=music_df["genre"])
+    _, df = get_genre_count(genres_df=music_df["genre"])
     df = df.nlargest(10, "count").sort_values(by="count", ascending=False)
     chart_genre_hist = get_altair_histogram(df)
 
@@ -232,9 +239,14 @@ def run_the_app():
     main_col2.altair_chart(chart_genre_hist, use_container_width=True)
 
     # Print wordcloud analysis
-    st.write("---")
-    st.markdown("### What genres does the playlist consist of?")
-    st.markdown("Wordcloud showing the genre distribution:")
+    st.markdown(
+        """
+    ---
+    ### What genres do the playlist consist of?
+    
+    All the genres are visualized here in a wordcloud format:
+    """
+    )
     st.image(image)
 
 
@@ -256,7 +268,7 @@ def get_altair_histogram(data=None):
             ),
             y=alt.Y("count", axis=alt.Axis(title="Counts")),
         )
-        .properties(width=200, height=600, title="Top 10 genres")
+        .properties(width=200, height=500, title="Top 10 genres")
         .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
         .configure_title(
             fontSize=20,
@@ -273,7 +285,6 @@ def show_audio_features(music_df=None):
     Take the music dataframe and create ui element that user can interact with
     to visualize different audio features
     :param music_df:
-    :return: Drawn plot (None)
     """
     audio_features = [
         "danceability",
@@ -284,7 +295,9 @@ def show_audio_features(music_df=None):
         "valence",
     ]
     tracks = st.multiselect(
-        "Choose track to visualize", list(music_df.index), ["Gold Digger", "Shake That"]
+        "Choose track to visualize",
+        list(music_df.index),
+        [music_df.index[0], music_df.index[1]],
     )
     if not tracks:
         st.error("Please select at least one track!")
@@ -293,12 +306,18 @@ def show_audio_features(music_df=None):
         data = data.loc[tracks]
 
         st.write("#### Chosen songs:", data.sort_index())
-        st.write("---")
-        # TODO explain features
         st.markdown(
             """
-        **Features explained:**
-       
+        ---
+        #### **Features explained:**
+        - **Danceability:** Measure of how suitable a track is for dancing.
+        - **Acousticness:** Acousticness of track.
+        - **Energy:** Measure of intensity and activity in track.
+        - **Instrumentalness:** If the track contains no vocals.
+        - **Liveness:** Detects presence of audience. If the track was performed live.
+        - **Loudness:** Loudness of track.
+        - **Speechiness:** Measure the presence of spoken words in contrast to rapped/sung words.  
+        - **Valence:** Indicates how positive or happy a song is.
         """
         )
 
@@ -312,6 +331,11 @@ def show_audio_features(music_df=None):
 
 
 def get_audiofeature_chart(data):
+    """
+    Get altair chart object for audio feature plot
+    :param data:
+    :return:
+    """
     chart_features = (
         alt.Chart(data)
         .mark_area(opacity=0.3)
@@ -321,7 +345,7 @@ def get_audiofeature_chart(data):
             color="Song",
         )
         .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
-        .properties(title="Audio features", height=500)
+        .properties(title="Audio features", height=500, width=200)
         .configure_title(
             fontSize=20,
         )
