@@ -132,20 +132,18 @@ def get_genre_count(genres_df=None):
 
     # Get all genres as long list
     genres_long = []
-    for this_track in genres_df['genre']:
-        genres_long.extend(list(this_track.split("/")))
-
-    # Count the occurrence of each genre
-    genres_count = Counter(genres_long)
 
     # Genres/artist dicts
     genre_artists = defaultdict(list)
 
-    # Fill in artists that have a genre. Super inefficient
-    for genre in genres_count:
-        for index,row in genres_df.iterrows():
-            if genre in row['genre'].split("/"):
-                genre_artists[genre].append(row['artist'])
+    for index, row in genres_df.iterrows():
+        genres_long.extend(list(row['genre'].split("/")))
+        for elem in list(row['genre'].split("/")):
+            genre_artists[elem].append(row['artist'])
+        genre_artists[elem] = genre_artist[elem].set()
+
+    # Count the occurrence of each genre
+    genres_count = Counter(genres_long)
 
     df = (
         pd.DataFrame.from_dict(genres_count, orient="index")
@@ -207,7 +205,7 @@ def run_the_app():
     music_df = get_dataframe(f"data/{playlist_name}.csv")
 
     # Set a headline for the current view
-    st.title("Welcome to the audio feature analysis page")
+    st.title("Welcome to the audio feature analysis page :musical_note:")
     st.write(
         """
         Here you will find different analysis and visualizations of the playlist data.
