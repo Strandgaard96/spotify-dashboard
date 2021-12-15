@@ -135,14 +135,27 @@ def get_genre_count(genres_df=None):
 
     # Genres/artist dicts
     genre_artists = defaultdict(list)
+    genre_artists_count = defaultdict()
 
-    for index, row in genres_df.iterrows():
-        genres_long.extend(list(row['genre'].split("/")))
-        for elem in list(row['genre'].split("/")):
-            genre_artists[elem].append(row['artist'])
+    for _, row in genres_df.iterrows():
+        genres_long.extend(list(row["genre"].split("/")))
+        for elem in list(row["genre"].split("/")):
+            genre_artists[elem].append(row["artist"])
 
+    # Count how many times an artist contributes to genre and order accornding to highest.
+    # One dict contains the count for a genre. The other contains the sorted (From highest to lowest)
+    # artists for a given genre.
     for elem in genre_artists:
-        genre_artists[elem] = list(set(genre_artists[elem]))
+        genre_artists_count[elem] = Counter(genre_artists[elem])
+        genre_artists[elem] = list(
+            dict.fromkeys(
+                sorted(
+                    genre_artists[elem],
+                    key=Counter(genre_artists[elem]).get,
+                    reverse=True,
+                )
+            )
+        )
 
     # Count the occurrence of each genre
     genres_count = Counter(genres_long)
@@ -152,8 +165,8 @@ def get_genre_count(genres_df=None):
         .reset_index()
         .rename(columns={"index": "genre", 0: "count", 1: "artists"})
     )
-    df['artists'] =df['genre'].map(genre_artists)
-    return genres_count, df
+    df["artists"] = df["genre"].map(genre_artists)
+    return genres_count, df, genre_artists_count
 
 
 def generate_wordcloud(genres_df=None, playlist_name=None):
@@ -169,7 +182,7 @@ def generate_wordcloud(genres_df=None, playlist_name=None):
         colormap=cm.inferno,
         include_numbers=True,
     )
-    genres_count, _ = get_genre_count(genres_df=genres_df)
+    genres_count, _ , _= get_genre_count(genres_df=genres_df)
     genre_wordcloud.generate_from_frequencies(genres_count)
     genre_wordcloud.to_file(f"data/{playlist_name}.png")
 
@@ -238,9 +251,13 @@ def run_the_app():
     image = get_wordcloud_image(playlist_name=playlist_name)
 
     # Get histogram chart opbject
-    _, df = get_genre_count(genres_df=music_df[["genre",'artist']])
-    df_count = df.nlargest(10, "count").sort_values(by="count", ascending=False).reset_index()
-    chart_genre_hist = get_altair_histogram(df_count)
+    _, df, genre_artists_count = get_genre_count(
+        genres_df=music_df[["genre", "artist"]]
+    )
+    df_count = (
+        df.nlargest(10, "count").sort_values(by="count", ascending=False).reset_index()
+    )
+    chart_genre_hist = get_altair_histogram(df_count, genre_artists_count)
 
     # Get audio feature analysis
     chart_features = show_audio_features(music_df=music_df)
@@ -262,17 +279,30 @@ def run_the_app():
     st.image(image)
 
 
-
-def get_altair_histogram(data=None):
+def get_altair_histogram(data=None, genre_artists_count=None):
     """
     Create a histogram of the most common genres
     :param data:
     :return: alt.Chart : hist
     """
 
-    # Extract the five first artists as examples of genre.
-    # We use map here as apply is designed to work on rows at a time
-    data['artists'] = data['artists'].map(lambda x: " - ".join(x[0:5]))
+    # This breaks if there are not five artists on the genre.
+    def _applyfunc(genre, artists):
+        return (
+            f"{artists[0]}({genre_artists_count[genre][artists[0]]})\n - "
+            f"{artists[1]}({genre_artists_count[genre][artists[1]]})\n - "
+            f"{artists[2]}({genre_artists_count[genre][artists[2]]})\n - "
+            f"{artists[3]}({genre_artists_count[genre][artists[3]]})\n - "
+            f"{artists[4]}({genre_artists_count[genre][artists[4]]})\n"
+        )
+
+    # Format the top five artists of a genre to be shown in tooltip
+    data["artists"] = data[["artists", "genre"]].apply(
+        lambda row: _applyfunc(row["genre"], row["artists"]), axis=1
+    )
+
+    # Old version
+    # data['artists'] = data['artists'].map(lambda x: f" - ".join(x[0:5]))
 
     hist = (
         alt.Chart(data)
@@ -284,8 +314,8 @@ def get_altair_histogram(data=None):
                 sort=alt.EncodingSortField(order="ascending"),
             ),
             y=alt.Y("count", axis=alt.Axis(title="Counts")),
-            color=alt.Color('genre', legend=None),
-            tooltip='artists'
+            color=alt.Color("genre", legend=None),
+            tooltip=alt.Tooltip("artists", title="title"),
         )
         .properties(width=200, height=500, title="Top 10 genres")
         .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
