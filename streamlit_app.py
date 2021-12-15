@@ -140,7 +140,9 @@ def get_genre_count(genres_df=None):
         genres_long.extend(list(row['genre'].split("/")))
         for elem in list(row['genre'].split("/")):
             genre_artists[elem].append(row['artist'])
-        genre_artists[elem] = genre_artist[elem].set()
+
+    for elem in genre_artists:
+        genre_artists[elem] = list(set(genre_artists[elem]))
 
     # Count the occurrence of each genre
     genres_count = Counter(genres_long)
@@ -237,8 +239,8 @@ def run_the_app():
 
     # Get histogram chart opbject
     _, df = get_genre_count(genres_df=music_df[["genre",'artist']])
-    df = df.nlargest(10, "count").sort_values(by="count", ascending=False)
-    chart_genre_hist = get_altair_histogram(df)
+    df_count = df.nlargest(10, "count").sort_values(by="count", ascending=False).reset_index()
+    chart_genre_hist = get_altair_histogram(df_count)
 
     # Get audio feature analysis
     chart_features = show_audio_features(music_df=music_df)
@@ -260,14 +262,17 @@ def run_the_app():
     st.image(image)
 
 
+
 def get_altair_histogram(data=None):
     """
     Create a histogram of the most common genres
     :param data:
     :return: alt.Chart : hist
     """
-    for elem in data['artists']:
-        data['artists']="-".join(elem[0:5])
+
+    # Extract the five first artists as examples of genre.
+    # We use map here as apply is designed to work on rows at a time
+    data['artists'] = data['artists'].map(lambda x: " - ".join(x[0:5]))
 
     hist = (
         alt.Chart(data)
@@ -280,6 +285,7 @@ def get_altair_histogram(data=None):
             ),
             y=alt.Y("count", axis=alt.Axis(title="Counts")),
             color='genre',
+            tooltip='artists'
         )
         .properties(width=200, height=500, title="Top 10 genres")
         .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
