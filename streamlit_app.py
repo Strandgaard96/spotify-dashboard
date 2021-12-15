@@ -313,8 +313,22 @@ def show_audio_features(music_df=None):
         "liveness",
         "valence",
     ]
+    st.markdown(
+        """
+    ---
+    #### **Features explained:**
+    - **Danceability:** Measure of how suitable a track is for dancing.
+    - **Acousticness:** Acousticness of track.
+    - **Energy:** Measure of intensity and activity in track.
+    - **Instrumentalness:** If the track contains no vocals.
+    - **Liveness:** Detects presence of audience. If the track was performed live.
+    - **Loudness:** Loudness of track.
+    - **Speechiness:** Measure the presence of spoken words in contrast to rapped/sung words.  
+    - **Valence:** Indicates how positive or happy a song is.
+    """
+    )
     tracks = st.multiselect(
-        "Choose tracks to visualize",
+        "Choose tracks to visualize:",
         list(music_df.index),
         [music_df.index[0], music_df.index[1]],
     )
@@ -325,20 +339,6 @@ def show_audio_features(music_df=None):
         data = data.loc[tracks]
 
         st.write("#### Chosen songs:", data.sort_index())
-        st.markdown(
-            """
-        ---
-        #### **Features explained:**
-        - **Danceability:** Measure of how suitable a track is for dancing.
-        - **Acousticness:** Acousticness of track.
-        - **Energy:** Measure of intensity and activity in track.
-        - **Instrumentalness:** If the track contains no vocals.
-        - **Liveness:** Detects presence of audience. If the track was performed live.
-        - **Loudness:** Loudness of track.
-        - **Speechiness:** Measure the presence of spoken words in contrast to rapped/sung words.  
-        - **Valence:** Indicates how positive or happy a song is.
-        """
-        )
 
         data = data.T.reset_index()
         data = pd.melt(data, id_vars=["index"]).rename(
