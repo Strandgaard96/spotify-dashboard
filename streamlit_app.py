@@ -284,7 +284,7 @@ def get_altair_histogram(data=None):
                 sort=alt.EncodingSortField(order="ascending"),
             ),
             y=alt.Y("count", axis=alt.Axis(title="Counts")),
-            color='genre',
+            color=alt.Color('genre', legend=None),
             tooltip='artists'
         )
         .properties(width=200, height=500, title="Top 10 genres")
