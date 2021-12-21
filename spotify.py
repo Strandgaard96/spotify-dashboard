@@ -4,8 +4,10 @@ Module responsible for handling spotify interaction.
 import numpy as np
 import pandas as pd
 import spotipy
+
 # Not sure how this import will affect the app
 import streamlit as st
+
 from spotipy.oauth2 import SpotifyOAuth
 
 
@@ -57,6 +59,7 @@ def analyze_playlist(creator, playlist_id, sp):
             creator, playlist_id=playlist_id, limit="100", offset=offset
         )["items"]
         for track in playlist:
+
             # Get metadata
             playlist_features["artist"] = track["track"]["album"]["artists"][0]["name"]
             playlist_features["album"] = track["track"]["album"]["name"]
@@ -67,7 +70,10 @@ def analyze_playlist(creator, playlist_id, sp):
             # Get audio features
             audio_features = sp.audio_features(playlist_features["track_id"])[0]
             for feature in playlist_features_list[5:]:
-                playlist_features[feature] = audio_features[feature]
+                if audio_features is None:
+                    playlist_features[feature] = 0
+                else:
+                    playlist_features[feature] = audio_features[feature]
 
             # Get artist genre
             this_artist_id = track["track"]["artists"][0]["id"]
@@ -80,10 +86,11 @@ def analyze_playlist(creator, playlist_id, sp):
                 except spotipy.SpotifyException as exception:
                     print(exception)
                     print(
-                        "Experienced an error when getting artist. Likely invalid artist id."
+                        f"Experienced an error when getting artist. Likely invalid artist id for the track: {track['track']['name']}"
+                        f"The artist was : {track['track']['artists'][0]['name']}"
                     )
                     this_genres = []
-                if this_genres == []:
+                if not this_genres:
                     this_genres = ["unknown"]
             # Convert list of genres to string for storage in dataframe
             playlist_features["genre"] = "/".join(this_genres)
@@ -96,7 +103,11 @@ def analyze_playlist(creator, playlist_id, sp):
             track_df = pd.DataFrame(playlist_features, index=[0])
             playlist_df = pd.concat([playlist_df, track_df], ignore_index=True)
 
-    return playlist_df
+    # Get playlist name to return
+    playlist_name = sp.user_playlist(
+        creator, playlist_id=playlist_id)['name']
+
+    return playlist_df, playlist_name
 
 
 def main():
@@ -114,11 +125,11 @@ def main():
     )
 
     # Playlist id to download data for
-    playlist_id = "3PDP5gjPxjiXfYbgf8ll9C"
-    playlist_df = analyze_playlist(creator="dansken02", playlist_id=playlist_id, sp=sp)
+    playlist_id = "3vmJSGD3GyrWBdTrpNazPs"
+    playlist_df, playlist_name = analyze_playlist(creator="dansken02", playlist_id=playlist_id, sp=sp)
 
     # Save dataframe
-    playlist_df.to_csv("data/$.csv", index=False)
+    playlist_df.to_csv(f"data/{playlist_name}.csv", index=False)
 
 
 if __name__ == "__main__":
