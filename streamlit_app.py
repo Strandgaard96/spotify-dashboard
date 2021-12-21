@@ -209,13 +209,23 @@ def run_the_app():
     # Get the playlist data
     @st.cache
     def get_dataframe(data):
-        df = pd.read_csv(data)
+
+        # Define the dtypes for columns to ensure correct format for later analysis
+        dtypes = {'artist': 'str', 'genre': 'str', 'album': 'str', 'track_name': 'str',
+                  'track_id': 'str','danceability': 'float','energy': 'float','key': 'str',
+                  'loudness': 'float','speechiness': 'float','instrumentalness': 'float','liveness': 'float',
+                  'valence': 'float','tempo':'float', 'duration_ms':'int','time_signature':'int',
+                  'track_popularity':'float','added_at':'str'
+                  }
+        parse_dates = ['time_signature']
+        df = pd.read_csv(data, dtype=dtypes, parse_dates=parse_dates)
+
         return df.set_index("track_name")
 
     # Variable for the name of the playlist.
     # The same name used for the data file and wordcloud image
     # Should be extended to be a dynamic variable through user input.
-    playlist_name = "$"
+    playlist_name = "Tec"
 
     music_df = get_dataframe(f"data/{playlist_name}.csv")
 
@@ -247,7 +257,7 @@ def run_the_app():
 
     # Generate wordcloud if one does not exist for the current playlist
     if not os.path.isfile(f"data/{playlist_name}.png"):
-        generate_wordcloud(genres_df=music_df["genre"], playlist_name=playlist_name)
+        generate_wordcloud(genres_df=music_df[["genre","artist"]], playlist_name=playlist_name)
     image = get_wordcloud_image(playlist_name=playlist_name)
 
     # Get histogram chart opbject
@@ -375,6 +385,9 @@ def show_audio_features(music_df=None):
             columns={"index": "Feature", "value": "Value", "track_name": "Song"}
         )
         chart_features = get_audiofeature_chart(data)
+
+        # For debugging chart:
+        #chart_features.show()
 
         return chart_features
 
