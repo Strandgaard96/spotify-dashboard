@@ -298,13 +298,21 @@ def get_altair_histogram(data=None, genre_artists_count=None):
 
     # This breaks if there are not five artists on the genre.
     def _applyfunc(genre, artists):
-        return (
-            f"{artists[0]}({genre_artists_count[genre][artists[0]]})\n - "
-            f"{artists[1]}({genre_artists_count[genre][artists[1]]})\n - "
-            f"{artists[2]}({genre_artists_count[genre][artists[2]]})\n - "
-            f"{artists[3]}({genre_artists_count[genre][artists[3]]})\n - "
-            f"{artists[4]}({genre_artists_count[genre][artists[4]]})\n"
-        )
+
+        # How many artists to include in tooltip is given by num
+        # 5 is default
+        num = 5
+
+        # Handle if there are less than 5 top artists for genre
+        if len(artists) < 5:
+            num = len(artists)
+
+        # Generate tooltip string
+        top_artists = ""
+        for i in range(num):
+            top_artists += f"{artists[i]}({genre_artists_count[genre][artists[i]]})\n - "
+
+        return top_artists
 
     # Format the top five artists of a genre to be shown in tooltip
     data["artists"] = data[["artists", "genre"]].apply(
