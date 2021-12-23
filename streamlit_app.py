@@ -307,12 +307,12 @@ def run_the_app():
     )
 
     # Get 10 largest genres and sort by count.
-    df_count = (
+    df_largest = (
         df.nlargest(10, "count").sort_values(by="count", ascending=False).reset_index()
     )
 
     # Get histogram for the 10 largest dataframe.
-    chart_genre_hist = get_altair_histogram(df_count, genre_artists_count)
+    chart_genre_hist = get_altair_histogram(df_largest, genre_artists_count, domain=[0,300], title='Top 10 Genres')
 
     # Audio feature analysis
     audio_features = [
@@ -376,8 +376,14 @@ def run_the_app():
     st.image(image)
 
     # Look at obscure genres
+    # Get 10 largest genres and sort by count.
+    df_smallest = (
+        df.nsmallest(40, "count").sort_values(by="count", ascending=False).reset_index()
+    )
+
     # Get altair object
-    chart_genre_hist = get_altair_histogram(df_count, genre_artists_count)
+    chart_genre_hist = get_altair_histogram(df_smallest, genre_artists_count, domain=[0,2],\
+                                            title='40 lowest count genres')
 
     # Write chart to page
     st.altair_chart(chart_genre_hist, use_container_width=True)

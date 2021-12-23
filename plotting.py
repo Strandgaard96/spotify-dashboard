@@ -11,7 +11,7 @@ def get_wordcloud_image(playlist_name=None):
     return image
 
 
-def get_altair_histogram(data=None, genre_artists_count=None):
+def get_altair_histogram(data=None, genre_artists_count=None, domain=None, title=None):
     """Create altair chart object
 
     Args:
@@ -62,11 +62,11 @@ def get_altair_histogram(data=None, genre_artists_count=None):
                 axis=alt.Axis(title="Genre"),
                 sort=alt.EncodingSortField(order="ascending"),
             ),
-            y=alt.Y("count", axis=alt.Axis(title="Counts")),
+            y=alt.Y("count", axis=alt.Axis(title="Counts", tickMinStep=1),scale=alt.Scale(domain=domain)),
             color=alt.Color("genre", legend=None),
             tooltip=alt.Tooltip("artists", title="title"),
         )
-        .properties(width=200, height=500, title="Top 10 genres")
+        .properties(width=200, height=500, title=title)
         .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
         .configure_title(
             fontSize=20,
