@@ -14,19 +14,18 @@ TODOs:
 """
 import os
 import urllib
-from collections import Counter
-from collections import defaultdict
+from collections import Counter, defaultdict
 
-import altair as alt
 import pandas as pd
 import streamlit as st
-from PIL import Image
 from matplotlib import cm
 from wordcloud import WordCloud
 
-
 # Example data for debugging and development
 # from vega_datasets import data as data_vega
+
+# Get plotting utility
+from plotting import get_wordcloud_image, get_altair_histogram, get_audiofeature_chart
 
 
 def main():
@@ -44,9 +43,10 @@ def main():
     for filename in EXTERNAL_DEPENDENCIES.keys():
         download_file(filename)
 
+    # Hack to try and center image.
     _, col2, _ = st.sidebar.columns([1, 1, 1])
     # Sombra logo in sidebar
-    col2.image("images/sombra.png", width=120)
+    col2.image("images/sombra.png", width=110)
 
     # Create sidebar for selecting app pages
     st.sidebar.title("Select an app mode below: ")
@@ -76,15 +76,14 @@ def main():
 
 # This file downloader demonstrates Streamlit animation.
 def download_file(file_path):
-    '''
+    """
     Downloads files specified by EXTERNAL_DEPENDENCIES to current directory.
     The keys are the filenames of the downloaded files.
     Args:
         file_path (str): Path to file to download
     Returns:
         None
-    '''
-
+    """
 
     # Don't download the file twice. (If possible, verify the download using
     # the file length.)
@@ -129,7 +128,7 @@ def download_file(file_path):
 
 
 def get_genre_count(genres_df=None):
-    '''
+    """
     Utility method to extract genres from the dataframe into list
 
     Args:
@@ -139,7 +138,7 @@ def get_genre_count(genres_df=None):
         genres_count (iterable of int): How many songs of each genre
         df (DataFrame): Dataframe containing number of each genre and a set of corresponding artists.
         genre_artists_count (nested dict with iterable of strings): Counter objects for each genre
-    '''
+    """
 
     # Initialize list to hold all genre entries
     genres_long = []
@@ -191,7 +190,7 @@ def get_genre_count(genres_df=None):
 
 
 def generate_wordcloud(genres_df=None, playlist_name=None):
-    '''
+    """
 
     Args:
         genres_df (DataFrame): Songs as index and columns of artist and genre list
@@ -199,7 +198,7 @@ def generate_wordcloud(genres_df=None, playlist_name=None):
 
     Returns:
         None
-    '''
+    """
     # Inspo from :
     # https://oleheggli.medium.com/easily-analyse-audio-features-from-spotify-playlists-part-3-ec00a55e87e4
 
@@ -211,27 +210,20 @@ def generate_wordcloud(genres_df=None, playlist_name=None):
         colormap=cm.inferno,
         include_numbers=True,
     )
-    genres_count, _ , _= get_genre_count(genres_df=genres_df)
+    genres_count, _, _ = get_genre_count(genres_df=genres_df)
     genre_wordcloud.generate_from_frequencies(genres_count)
     genre_wordcloud.to_file(f"data/{playlist_name}.png")
 
 
-@st.cache
-def get_wordcloud_image(playlist_name=None):
-    """Get wordcloud image from repo (which is cached by streamlit decorator)"""
-    image = Image.open(f"data/{playlist_name}.png")
-    return image
-
-
 def run_the_app():
-    ''' Run analysis
+    """Run analysis
 
     Args:
         None
 
     Returns:
         None
-    '''
+    """
 
     # To make Streamlit fast, st.cache allows us to reuse computation across runs.
     # In this common pattern, we download data from an endpoint only once.
@@ -244,13 +236,27 @@ def run_the_app():
     def get_dataframe(data):
 
         # Define the dtypes for columns to ensure correct format for later analysis
-        dtypes = {'artist': 'str', 'genre': 'str', 'album': 'str', 'track_name': 'str',
-                  'track_id': 'str','danceability': 'float','energy': 'float','key': 'str',
-                  'loudness': 'float','speechiness': 'float','instrumentalness': 'float','liveness': 'float',
-                  'valence': 'float','tempo':'float', 'duration_ms':'int','time_signature':'int',
-                  'track_popularity':'float','added_at':'str'
-                  }
-        parse_dates = ['time_signature']
+        dtypes = {
+            "artist": "str",
+            "genre": "str",
+            "album": "str",
+            "track_name": "str",
+            "track_id": "str",
+            "danceability": "float",
+            "energy": "float",
+            "key": "str",
+            "loudness": "float",
+            "speechiness": "float",
+            "instrumentalness": "float",
+            "liveness": "float",
+            "valence": "float",
+            "tempo": "float",
+            "duration_ms": "int",
+            "time_signature": "int",
+            "track_popularity": "float",
+            "added_at": "str",
+        }
+        parse_dates = ["time_signature"]
         df = pd.read_csv(data, dtype=dtypes, parse_dates=parse_dates)
 
         return df.set_index("track_name")
@@ -290,7 +296,9 @@ def run_the_app():
 
     # Generate wordcloud if one does not exist for the current playlist
     if not os.path.isfile(f"data/{playlist_name}.png"):
-        generate_wordcloud(genres_df=music_df[["genre","artist"]], playlist_name=playlist_name)
+        generate_wordcloud(
+            genres_df=music_df[["genre", "artist"]], playlist_name=playlist_name
+        )
     image = get_wordcloud_image(playlist_name=playlist_name)
 
     # Get histogram chart opbject
@@ -306,108 +314,7 @@ def run_the_app():
     # Get histogram for the 10 largest dataframe.
     chart_genre_hist = get_altair_histogram(df_count, genre_artists_count)
 
-    # Get audio feature analysis
-    chart_features = show_audio_features(music_df=music_df)
-
-    # Print both obtained charts
-    main_col1, main_col2 = st.columns([1, 1])
-    main_col1.altair_chart(chart_features, use_container_width=True)
-    main_col2.altair_chart(chart_genre_hist, use_container_width=True)
-
-    # Print wordcloud analysis
-    st.markdown(
-        """
-    ---
-    ### What genres do the playlist consist of?
-    
-    All the genres are visualized here in a wordcloud format:
-    """
-    )
-    st.image(image)
-
-    # Look at obscure genres
-    # Get altair object
-    chart_genre_hist = get_altair_histogram(df_count, genre_artists_count)
-
-   # Write chart to page
-    st.altair_chart(chart_genre_hist, use_container_width=True)
-
-
-def get_altair_histogram(data=None, genre_artists_count=None):
-    ''' Create altair chart object
-
-    Args:
-        data (DataFrame): Contains genres and the counts of each genre
-        Also an artist column should be present for tooltip.
-        genre_artists_count (dict): Contains Counter iterable with artists for each genre
-    Returns:
-        hist (altair chart): Altair chart object
-    '''
-
-    def _applyfunc(genre, artists):
-        "Helper func to convert artist column format to tooltip suitable string"
-
-        # How many artists to include in tooltip is given by num
-        # 5 is default
-        num = 5
-
-        # Handle if there are less than 5 top artists for genre
-        if len(artists) < 5:
-            num = len(artists)
-
-        # Generate tooltip string.
-        # TODO handle the last dash in a better way
-        top_artists = ""
-        for i in range(num):
-            top_artists += f"{artists[i]}({genre_artists_count[genre][artists[i]]})\n - "
-        return top_artists[0:-2]
-
-    # Create buffer to hold formated data
-    buffer = data.copy()
-
-    # Format the top five artists of a genre to be shown in tooltip
-    buffer["artists"] = data[["artists", "genre"]].apply(
-        lambda row: _applyfunc(row["genre"], row["artists"]), axis=1
-    )
-
-    # Old version
-    # data['artists'] = data['artists'].map(lambda x: f" - ".join(x[0:5]))
-
-    hist = (
-        alt.Chart(buffer)
-        .mark_bar()
-        .encode(
-            x=alt.X(
-                "genre",
-                axis=alt.Axis(title="Genre"),
-                sort=alt.EncodingSortField(order="ascending"),
-            ),
-            y=alt.Y("count", axis=alt.Axis(title="Counts")),
-            color=alt.Color("genre", legend=None),
-            tooltip=alt.Tooltip("artists", title="title"),
-        )
-        .properties(width=200, height=500, title="Top 10 genres")
-        .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
-        .configure_title(
-            fontSize=20,
-        )
-    )
-    # Can be added to enable scroll and zoom in the chart
-    # .interactive()
-
-    return hist
-
-
-def show_audio_features(music_df=None):
-    '''
-    Take the music dataframe and create UI elements that user can interact with
-    to visualize different audio features
-    Args:
-        music_df (DataFrame): Contains music data
-
-    Returns:
-        chart_features (altair chart): Chart object to show on main page
-    '''
+    # Audio feature analysis
     audio_features = [
         "danceability",
         "energy",
@@ -450,36 +357,30 @@ def show_audio_features(music_df=None):
         chart_features = get_audiofeature_chart(data)
 
         # For debugging chart:
-        #chart_features.show()
+        # chart_features.show()
 
-        return chart_features
+    # Print both obtained charts
+    main_col1, main_col2 = st.columns([1, 1])
+    main_col1.altair_chart(chart_features, use_container_width=True)
+    main_col2.altair_chart(chart_genre_hist, use_container_width=True)
 
-
-def get_audiofeature_chart(data):
-    '''
-
-    Args:
-        data (DataFrame): Contains audio feature data
-
-    Returns:
-        chart_features (altair chart): Chart object to show in main page
-    '''
-    chart_features = (
-        alt.Chart(data)
-        .mark_area(opacity=0.3)
-        .encode(
-            x="Feature",
-            y=alt.Y("Value", stack=None, scale=alt.Scale(domain=[0, 1])),
-            color="Song",
-        )
-        .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
-        .properties(title="Audio features", height=500, width=200)
-        .configure_title(
-            fontSize=20,
-        )
-        .configure_legend(symbolSize=250, titleFontSize=25, labelFontSize=25)
+    # Print wordcloud analysis
+    st.markdown(
+        """
+    ---
+    ### What genres do the playlist consist of?
+    
+    All the genres are visualized here in a wordcloud format:
+    """
     )
-    return chart_features
+    st.image(image)
+
+    # Look at obscure genres
+    # Get altair object
+    chart_genre_hist = get_altair_histogram(df_count, genre_artists_count)
+
+    # Write chart to page
+    st.altair_chart(chart_genre_hist, use_container_width=True)
 
 
 # Download a single file and make its content available as a string.
