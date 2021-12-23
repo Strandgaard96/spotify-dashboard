@@ -288,6 +288,13 @@ def run_the_app():
     )
     st.image(image)
 
+    # Look at obscure genres
+    # Get altair object
+    chart_genre_hist = get_altair_histogram(df_count, genre_artists_count)
+
+   # Write chart to page
+    st.altair_chart(chart_genre_hist, use_container_width=True)
+
 
 def get_altair_histogram(data=None, genre_artists_count=None):
     """
@@ -307,15 +314,18 @@ def get_altair_histogram(data=None, genre_artists_count=None):
         if len(artists) < 5:
             num = len(artists)
 
-        # Generate tooltip string
+        # Generate tooltip string.
+        # TODO handle the last dash somehow
         top_artists = ""
         for i in range(num):
             top_artists += f"{artists[i]}({genre_artists_count[genre][artists[i]]})\n - "
+        return top_artists[0:-2]
 
-        return top_artists
+    # Create buffer to hold formated data
+    buffer = data.copy()
 
     # Format the top five artists of a genre to be shown in tooltip
-    data["artists"] = data[["artists", "genre"]].apply(
+    buffer["artists"] = data[["artists", "genre"]].apply(
         lambda row: _applyfunc(row["genre"], row["artists"]), axis=1
     )
 
@@ -323,7 +333,7 @@ def get_altair_histogram(data=None, genre_artists_count=None):
     # data['artists'] = data['artists'].map(lambda x: f" - ".join(x[0:5]))
 
     hist = (
-        alt.Chart(data)
+        alt.Chart(buffer)
         .mark_bar()
         .encode(
             x=alt.X(
