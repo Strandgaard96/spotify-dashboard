@@ -264,7 +264,7 @@ def run_the_app():
     # Variable for the name of the playlist.
     # The same name used for the data file and wordcloud image
     # Should be extended to be a dynamic variable through user input.
-    playlist_name = "Tec"
+    playlist_name = "$"
 
     music_df = get_dataframe(f"data/{playlist_name}.csv")
 
@@ -312,7 +312,7 @@ def run_the_app():
     )
 
     # Get histogram for the 10 largest dataframe.
-    chart_genre_hist = get_altair_histogram(df_largest, genre_artists_count, domain=[0,300], title='Top 10 Genres')
+    chart_genre_hist = get_altair_histogram(df_largest, genre_artists_count, domain=[0,max(df_largest['count'])], title='Top 10 Genres')
 
     # Audio feature analysis
     audio_features = [
@@ -399,7 +399,6 @@ def get_file_content_as_string(path):
     )
     response = urllib.request.urlopen(url)
     return response.read().decode("utf-8")
-
 
 # Path to the repo image folder
 REPO_URL_ROOT = (

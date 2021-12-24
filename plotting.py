@@ -10,8 +10,8 @@ def get_wordcloud_image(playlist_name=None):
     image = Image.open(f"data/{playlist_name}.png")
     return image
 
-
-def get_altair_histogram(data=None, genre_artists_count=None, domain=None, title=None):
+#domain=None, title=None
+def get_altair_histogram(data=None, genre_artists_count=None, **plt_kwargs):
     """Create altair chart object
 
     Args:
@@ -62,11 +62,12 @@ def get_altair_histogram(data=None, genre_artists_count=None, domain=None, title
                 axis=alt.Axis(title="Genre"),
                 sort=alt.EncodingSortField(order="ascending"),
             ),
-            y=alt.Y("count", axis=alt.Axis(title="Counts", tickMinStep=1),scale=alt.Scale(domain=domain)),
+            y=alt.Y("count", axis=alt.Axis(title="Counts", tickMinStep=1),\
+                    scale=alt.Scale(domain=plt_kwargs.get('domain',[0,1]))),
             color=alt.Color("genre", legend=None),
             tooltip=alt.Tooltip("artists", title="title"),
         )
-        .properties(width=200, height=500, title=title)
+        .properties(width=200, height=500, title=plt_kwargs.get('title','Genre histogram'))
         .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
         .configure_title(
             fontSize=20,
@@ -78,8 +79,8 @@ def get_altair_histogram(data=None, genre_artists_count=None, domain=None, title
     return hist
 
 
-def get_audiofeature_chart(data):
-    """
+def get_audiofeature_chart(data, **plt_kwargs):
+    """ Plot audio features area plot
 
     Args:
         data (DataFrame): Contains audio feature data
