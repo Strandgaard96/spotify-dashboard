@@ -16,6 +16,8 @@ import os
 
 import pandas as pd
 import streamlit as st
+from glob import glob
+from pathlib import Path
 
 # Example data for debugging and development
 # from vega_datasets import data as data_vega
@@ -23,7 +25,9 @@ import streamlit as st
 # Get plotting utility
 from data import download_file, get_genre_count, generate_wordcloud, get_file_content_as_string
 from plotting import get_wordcloud_image, get_altair_histogram, get_audiofeature_chart
-
+from spotipy.oauth2 import SpotifyOAuth
+import spotipy
+from spotify import spotify_driver
 
 def main():
     """
@@ -32,9 +36,6 @@ def main():
     """
     # Set content width
     st.set_page_config(page_title="Spotifire", layout="wide", page_icon=":fire:")
-
-    # Render the readme as markdown using st.markdown.
-    readme_text = st.markdown(get_file_content_as_string("intro.md"))
 
     # Download external dependencies.
     for filename in EXTERNAL_DEPENDENCIES.keys():
@@ -48,18 +49,28 @@ def main():
     st.sidebar.title("Select an app mode below: ")
     app_mode = st.sidebar.selectbox(
         "Choose the app mode",
-        ["Show instructions", "Run the app", "Show the source code"],
+        ["Show instructions", "Run the app", "Show the source code"], index=0
     )
+
+    # Get file names in folder:
+    datasets = glob("data/*.csv")
+
+    datasets = [Path(file).stem for file in datasets]
+    datasets.append("Custom")
 
     playlist_name = st.sidebar.selectbox(
         "Choose the dataset to analyze",
-        ["Tec", "$", "LP+","Custom"],
+        datasets,
     )
+
+    readme_text=st.markdown("")
 
     if playlist_name == 'Custom':
         app_mode = "Aquire data"
 
     if app_mode == "Show instructions":
+        # Render the readme as markdown using st.markdown.
+        readme_text = st.markdown(get_file_content_as_string("intro.md"))
         st.sidebar.success('To continue select "Run the app".')
     elif app_mode == "Show the source code":
         # Empty empties the container to
@@ -68,6 +79,11 @@ def main():
     elif app_mode == "Run the app":
         readme_text.empty()
         run_the_app(playlist_name=playlist_name)
+    elif app_mode == "Aquire data":
+        readme_text.empty()
+        aquire_data_app()
+
+
 
 
     # What to put under the sidebar
@@ -78,9 +94,85 @@ def main():
         unsafe_allow_html=True,
     )
 
+# To make Streamlit fast, st.cache allows us to reuse computation across runs.
+# In this common pattern, we download data from an endpoint only once.
+@st.cache
+def load_metadata(url):
+    return pd.read_csv(url)
 
-# This file downloader demonstrates Streamlit animation.
+# Get the playlist data
+@st.cache
+def get_dataframe(data):
 
+    # Define the dtypes for columns to ensure correct format for later analysis
+    dtypes = {
+        "artist": "str",
+        "genre": "str",
+        "album": "str",
+        "track_name": "str",
+        "track_id": "str",
+        "danceability": "float",
+        "energy": "float",
+        "key": "str",
+        "loudness": "float",
+        "speechiness": "float",
+        "instrumentalness": "float",
+        "liveness": "float",
+        "valence": "float",
+        "tempo": "float",
+        "duration_ms": "int",
+        "time_signature": "int",
+        "track_popularity": "float",
+        "added_at": "str",
+    }
+    parse_dates = ["time_signature"]
+    df = pd.read_csv(data, dtype=dtypes, parse_dates=parse_dates)
+
+    return df.set_index("track_name")
+
+def aquire_data_app():
+    ''' Streamlit page for aquiring new playlist data
+
+    Args:
+
+    Returns:
+
+    '''
+    scope = "playlist-read-private"
+    st.title("Download data page")
+    st.markdown(
+        """
+        Here you can enter a playlist id to download playlist data to analyze
+        """
+    )
+
+    placeholder = st.empty()
+    playlist_id = placeholder.text_input("Please enter a valid playlist id")
+    try:
+        sp = spotipy.Spotify(
+            auth_manager=SpotifyOAuth(
+                client_id=st.secrets["CLIENT_ID"],
+                client_secret=st.secrets["CLIENT_SECRET"],
+                redirect_uri=st.secrets["REDIRECT_URI"],
+                scope=scope,
+            )
+        )
+        playlist_name = sp.playlist(playlist_id)["name"]
+    except spotipy.SpotifyException as exception:
+        st.error("Please enter a valid playlist id")
+    else:
+        success=st.success(f"Found playlist with name: {playlist_name}\n"
+                   f" Retrieving playlist data")
+        with st.spinner("Please wait while data is downloading"):
+            spotify_driver(playlist_id=playlist_id)
+        success.empty()
+        placeholder.empty()
+        st.success(f"Finished downloading data. Please select the dataset in the dropdown and run the app.")
+
+
+    # Download data
+    return None
+    #TODO finish this
 
 def run_the_app(playlist_name='$'):
     """Run analysis page
@@ -91,42 +183,6 @@ def run_the_app(playlist_name='$'):
     Returns:
         None
     """
-
-    # To make Streamlit fast, st.cache allows us to reuse computation across runs.
-    # In this common pattern, we download data from an endpoint only once.
-    @st.cache
-    def load_metadata(url):
-        return pd.read_csv(url)
-
-    # Get the playlist data
-    @st.cache
-    def get_dataframe(data):
-
-        # Define the dtypes for columns to ensure correct format for later analysis
-        dtypes = {
-            "artist": "str",
-            "genre": "str",
-            "album": "str",
-            "track_name": "str",
-            "track_id": "str",
-            "danceability": "float",
-            "energy": "float",
-            "key": "str",
-            "loudness": "float",
-            "speechiness": "float",
-            "instrumentalness": "float",
-            "liveness": "float",
-            "valence": "float",
-            "tempo": "float",
-            "duration_ms": "int",
-            "time_signature": "int",
-            "track_popularity": "float",
-            "added_at": "str",
-        }
-        parse_dates = ["time_signature"]
-        df = pd.read_csv(data, dtype=dtypes, parse_dates=parse_dates)
-
-        return df.set_index("track_name")
 
     # Variable for the name of the playlist.
     # The same name used for the data file and wordcloud image
