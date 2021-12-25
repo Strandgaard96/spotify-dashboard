@@ -111,6 +111,9 @@ def get_genre_count(genres_df=None):
                 )
             )
         )
+        # Explanation of above snippet. sorted takes a list that is the artists for a certain genre
+        # Then sorts based on the function given by key.
+        # This is turned into dict of artist names and then into list.
 
     # Count the occurrence of each genre which is used as base for dataframe
     genres_count = Counter(genres_long)

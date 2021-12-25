@@ -13,14 +13,17 @@ from spotipy.oauth2 import SpotifyOAuth
 
 # Inspiration taken from this:
 # https://www.linkedin.com/pulse/extracting-your-fav-playlist-info-spotifys-api-samantha-jones/
-def analyze_playlist(creator, playlist_id, sp):
-    """
-    Extract relevant track data for given playlist id
-    :param creator: str
-    :param playlist_id : str
-    :param sp: Spotify authentification manager : class
-    :return: playlist : DataFrame
-    """
+def analyze_playlist(playlist_id, sp):
+    ''' Get playlist data from given id and authentification manager
+
+    Args:
+        playlist_id (str): ID of playlist to get data for.
+        sp (Spotify authentification instance): API authentification handler.
+
+    Returns:
+        playlist (DataFrame): Obtained playlist data.
+        playlist_name (str): Name of playlist with the specified ID.
+    '''
 
     # Create empty dataframe with relevant columns
     playlist_features_list = [
@@ -44,31 +47,38 @@ def analyze_playlist(creator, playlist_id, sp):
     ]
     playlist_df = pd.DataFrame(columns=playlist_features_list)
 
-    # Create empty dict for holding extracted features
-    playlist_features = {}
 
     # Get the number of tracks in the playlist
     playlist_length = sp.playlist(playlist_id)["tracks"]["total"]
+    playlist_name = sp.playlist(playlist_id)["name"]
+
     # Create loop values based on playlist length
     offsets = np.arange(0, playlist_length + (100 - playlist_length % 100), 100)
 
     # Loop through every track in the playlist,
     # extract features and append the features to the playlist.
     for offset in offsets:
-        playlist = sp.user_playlist_tracks(
-            creator, playlist_id=playlist_id, limit="100", offset=offset
+        playlist = sp.playlist_items(playlist_id=playlist_id, limit=100,offset=offset
         )["items"]
         for track in playlist:
 
+            # Create empty dict for holding extracted features
+            playlist_features = {}
+
             # Get metadata
-            playlist_features["artist"] = track["track"]["album"]["artists"][0]["name"]
+            playlist_features["artist"] = track['track']['artists'][0]['name']
             playlist_features["album"] = track["track"]["album"]["name"]
             playlist_features["track_name"] = track["track"]["name"]
             playlist_features["track_id"] = track["track"]["id"]
             playlist_features["track_popularity"] = track["track"]["popularity"]
             playlist_features["added_at"] = track["added_at"]
+
             # Get audio features
-            audio_features = sp.audio_features(playlist_features["track_id"])[0]
+            try:
+                audio_features = sp.audio_features(playlist_features["track_id"])[0]
+            except:
+                print(f'Error getting audio features for track: {playlist_features["track_name"]},\n'
+                      f'likely not valid track_id')
             for feature in playlist_features_list[5:]:
                 if audio_features is None:
                     playlist_features[feature] = 0
@@ -103,16 +113,12 @@ def analyze_playlist(creator, playlist_id, sp):
             track_df = pd.DataFrame(playlist_features, index=[0])
             playlist_df = pd.concat([playlist_df, track_df], ignore_index=True)
 
-    # Get playlist name to return
-    playlist_name = sp.user_playlist(
-        creator, playlist_id=playlist_id)['name']
-
     return playlist_df, playlist_name
 
 
-def main():
+def spotify_driver(playlist_id=None):
 
-    # Define the scope. U ensure that only a part of the information can be accessed.
+    # Define the scope. You ensure that only a part of the information can be accessed.
     scope = "playlist-read-private"
 
     sp = spotipy.Spotify(
@@ -125,12 +131,12 @@ def main():
     )
 
     # Playlist id to download data for
-    playlist_id = "3vmJSGD3GyrWBdTrpNazPs"
-    playlist_df, playlist_name = analyze_playlist(creator="dansken02", playlist_id=playlist_id, sp=sp)
+    playlist_df, playlist_name = analyze_playlist(playlist_id=playlist_id, sp=sp)
 
     # Save dataframe
     playlist_df.to_csv(f"data/{playlist_name}.csv", index=False)
 
 
 if __name__ == "__main__":
-    main()
+    playlist_id = "0mIif2dKh0Ns2RPd86w10l"
+    spotify_driver(playlist_id=playlist_id)
