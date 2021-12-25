@@ -51,6 +51,14 @@ def main():
         ["Show instructions", "Run the app", "Show the source code"],
     )
 
+    playlist_name = st.sidebar.selectbox(
+        "Choose the dataset to analyze",
+        ["Tec", "$", "LP+","Custom"],
+    )
+
+    if playlist_name == 'Custom':
+        app_mode = "Aquire data"
+
     if app_mode == "Show instructions":
         st.sidebar.success('To continue select "Run the app".')
     elif app_mode == "Show the source code":
@@ -59,7 +67,8 @@ def main():
         st.code(get_file_content_as_string("streamlit_app.py"))
     elif app_mode == "Run the app":
         readme_text.empty()
-        run_the_app()
+        run_the_app(playlist_name=playlist_name)
+
 
     # What to put under the sidebar
     st.sidebar.markdown(
@@ -73,8 +82,8 @@ def main():
 # This file downloader demonstrates Streamlit animation.
 
 
-def run_the_app():
-    """Run analysis
+def run_the_app(playlist_name='$'):
+    """Run analysis page
 
     Args:
         None
@@ -122,7 +131,6 @@ def run_the_app():
     # Variable for the name of the playlist.
     # The same name used for the data file and wordcloud image
     # Should be extended to be a dynamic variable through user input.
-    playlist_name = "$"
 
     music_df = get_dataframe(f"data/{playlist_name}.csv")
 
@@ -246,8 +254,6 @@ def run_the_app():
     # Write chart to page
     st.altair_chart(chart_genre_hist, use_container_width=True)
 
-
-# Download a single file and make its content available as a string.
 
 # Path to the repo image folder
 REPO_URL_ROOT = (
