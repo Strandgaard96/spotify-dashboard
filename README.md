@@ -42,7 +42,6 @@ I am trying to make an online spotify data exploration app for fun.
 
 * [Streamlit](https://github.com/streamlit/streamlit)
 
-
 See the [Issues][issues-url] for a list of proposed features (and known issues).
 
 
