@@ -56,7 +56,7 @@ def main():
     datasets = glob("data/*.csv")
 
     datasets = [Path(file).stem for file in datasets]
-    datasets.append("Custom")
+    #datasets.append("Custom")
 
     playlist_name = st.sidebar.selectbox(
         "Choose the dataset to analyze",
