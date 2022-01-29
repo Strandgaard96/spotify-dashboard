@@ -23,11 +23,17 @@ from pathlib import Path
 # from vega_datasets import data as data_vega
 
 # Get plotting utility
-from data import download_file, get_genre_count, generate_wordcloud, get_file_content_as_string
+from data import (
+    download_file,
+    get_genre_count,
+    generate_wordcloud,
+    get_file_content_as_string,
+)
 from plotting import get_wordcloud_image, get_altair_histogram, get_audiofeature_chart
 from spotipy.oauth2 import SpotifyOAuth
 import spotipy
 from spotify import spotify_driver
+
 
 def main():
     """
@@ -49,23 +55,27 @@ def main():
     st.sidebar.title("Select an app mode below: ")
     app_mode = st.sidebar.selectbox(
         "Choose the app mode",
-        ["Show instructions", "Run the app", "Show the source code"], index=0
+        ["Show instructions", "Run the app", "Show the source code"],
+        index=0,
     )
 
     # Get file names in folder:
     datasets = glob("data/*.csv")
 
     datasets = [Path(file).stem for file in datasets]
-    #datasets.append("Custom")
+
+    # Temporarily disabled
+    # Solution to the authentification problem could be spotipy.oauth2.SpotifyPKCE
+    # datasets.append("Custom")
 
     playlist_name = st.sidebar.selectbox(
         "Choose the dataset to analyze",
         datasets,
     )
 
-    readme_text=st.markdown("")
+    readme_text = st.markdown("")
 
-    if playlist_name == 'Custom':
+    if playlist_name == "Custom":
         app_mode = "Aquire data"
 
     if app_mode == "Show instructions":
@@ -83,9 +93,6 @@ def main():
         readme_text.empty()
         aquire_data_app()
 
-
-
-
     # What to put under the sidebar
     st.sidebar.markdown(
         '<h4>Made in &nbsp<img src="https://streamlit.io/images/brand/streamlit-mark-color.png"\
@@ -94,11 +101,13 @@ def main():
         unsafe_allow_html=True,
     )
 
+
 # To make Streamlit fast, st.cache allows us to reuse computation across runs.
 # In this common pattern, we download data from an endpoint only once.
 @st.cache
 def load_metadata(url):
     return pd.read_csv(url)
+
 
 # Get the playlist data
 @st.cache
@@ -130,14 +139,15 @@ def get_dataframe(data):
 
     return df.set_index("track_name")
 
+
 def aquire_data_app():
-    ''' Streamlit page for aquiring new playlist data
+    """Streamlit page for aquiring new playlist data
 
     Args:
 
     Returns:
 
-    '''
+    """
     scope = "playlist-read-private"
     st.title("Download data page")
     st.markdown(
@@ -161,16 +171,20 @@ def aquire_data_app():
     except spotipy.SpotifyException as exception:
         st.error("Please enter a valid playlist id")
     else:
-        success=st.success(f"Found playlist with name: {playlist_name}\n"
-                   f" Retrieving playlist data")
+        success = st.success(
+            f"Found playlist with name: {playlist_name}\n" f" Retrieving playlist data"
+        )
         with st.spinner("Please wait while data is downloading"):
             spotify_driver(playlist_id=playlist_id)
         success.empty()
         placeholder.empty()
-        st.success(f"Finished downloading data. Please select the dataset in the dropdown and run the app.")
+        st.success(
+            f"Finished downloading data. Please select the dataset in the dropdown and run the app."
+        )
     return None
 
-def run_the_app(playlist_name='$'):
+
+def run_the_app(playlist_name="$"):
     """Run analysis page
 
     Args:
@@ -230,7 +244,12 @@ def run_the_app(playlist_name='$'):
     )
 
     # Get histogram for the 10 largest dataframe.
-    chart_genre_hist = get_altair_histogram(df_largest, genre_artists_count, domain=[0,max(df_largest['count'])], title='Top 10 Genres')
+    chart_genre_hist = get_altair_histogram(
+        df_largest,
+        genre_artists_count,
+        domain=[0, max(df_largest["count"])],
+        title="Top 10 Genres",
+    )
 
     # Audio feature analysis
     audio_features = [
@@ -300,11 +319,17 @@ def run_the_app(playlist_name='$'):
     )
 
     # Get altair object
-    chart_genre_hist = get_altair_histogram(df_smallest, genre_artists_count, domain=[0,2],\
-                                            title='40 lowest count genres')
+    chart_genre_hist = get_altair_histogram(
+        df_smallest, genre_artists_count, domain=[0, 2], title="40 lowest count genres"
+    )
 
     # Write chart to page
     st.altair_chart(chart_genre_hist, use_container_width=True)
+
+    # Time based analysis
+    music_df
+
+    # TODO add additional analysis
 
 
 # Path to the repo image folder
