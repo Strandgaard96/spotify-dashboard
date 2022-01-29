@@ -114,7 +114,7 @@ def analyze_playlist(playlist_id, sp):
     return playlist_df, playlist_name
 
 
-def usage_analysis(sp):
+def usage_analysis(sp, period="long_term"):
     """Get user top tracks and artists
 
     Args:
@@ -123,30 +123,38 @@ def usage_analysis(sp):
     Returns:
         top_tracks_df (DataFrame):
     """
+
     # Create empty dataframe with relevant columns
     top_tracks_features_list = [
-        "Fill in",
+        "artist",
+        "track_name",
+        "popularity",
+        "explicit",
     ]
     top_tracks_df = pd.DataFrame(columns=top_tracks_features_list)
 
     top_tracks = sp.current_user_top_tracks(time_range="short_term")
     total_top_tracks = top_tracks["total"]
-    # Create loop values based on playlist length
-    offsets = np.arange(0, playlist_length + (20 - playlist_length % 100), 20)
+
+    # Create loop values based on number of top tracks
+    offsets = np.arange(0, total_top_tracks + (20 - total_top_tracks % 100), 20)
 
     for offset in offsets:
         top_tracks = sp.current_user_top_tracks(
-            limit=20, offset=offset, time_range="long_term"
+            limit=20, offset=offset, time_range=period
         )["items"]
         for track in top_tracks:
             # Create empty dict for holding extracted features
             track_features = {}
 
             # TODO extract features
-
+            track_features['artist'] = track["artists"][0]["name"]
+            track_features['track_name'] = track["name"]
+            track_features['popularity'] = track["popularity"]
+            track_features['explicit'] = track["explicit"]
             # Concat the dfs
             track_df = pd.DataFrame(track_features, index=[0])
-            top_tracks_df = pd.concat([playlist_df, track_df], ignore_index=True)
+            top_tracks_df = pd.concat([top_tracks_df, track_df],ignore_index=True)
 
     return top_tracks_df
 
@@ -165,7 +173,7 @@ def spotify_driver(playlist_id=None):
         )
     )
 
-    usage_analysis(sp=sp)
+    top_tracks_df = usage_analysis(sp=sp)
 
     # Define new scope for playlist analysis
     scope = "playlist-read-private"

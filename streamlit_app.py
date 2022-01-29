@@ -331,6 +331,11 @@ def run_the_app(playlist_name="$"):
 
     # TODO add additional analysis
 
+    # Time based analysis
+
+
+    # TODO add more analysis
+
 
 # Path to the repo image folder
 REPO_URL_ROOT = (
