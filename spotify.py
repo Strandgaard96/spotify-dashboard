@@ -61,7 +61,6 @@ def analyze_playlist(playlist_id, sp):
             "items"
         ]
         for track in playlist:
-
             # Create empty dict for holding extracted features
             playlist_features = {}
 
@@ -133,7 +132,7 @@ def usage_analysis(sp, period="long_term"):
     ]
     top_tracks_df = pd.DataFrame(columns=top_tracks_features_list)
 
-    top_tracks = sp.current_user_top_tracks(time_range="short_term")
+    top_tracks = sp.current_user_top_tracks(time_range="short_term", limit=50)
     total_top_tracks = top_tracks["total"]
 
     # Create loop values based on number of top tracks
@@ -141,20 +140,20 @@ def usage_analysis(sp, period="long_term"):
 
     for offset in offsets:
         top_tracks = sp.current_user_top_tracks(
-            limit=20, offset=offset, time_range=period
+            limit=50, offset=offset, time_range=period
         )["items"]
         for track in top_tracks:
             # Create empty dict for holding extracted features
             track_features = {}
 
             # TODO extract features
-            track_features['artist'] = track["artists"][0]["name"]
-            track_features['track_name'] = track["name"]
-            track_features['popularity'] = track["popularity"]
-            track_features['explicit'] = track["explicit"]
+            track_features["artist"] = track["artists"][0]["name"]
+            track_features["track_name"] = track["name"]
+            track_features["popularity"] = track["popularity"]
+            track_features["explicit"] = track["explicit"]
             # Concat the dfs
             track_df = pd.DataFrame(track_features, index=[0])
-            top_tracks_df = pd.concat([top_tracks_df, track_df],ignore_index=True)
+            top_tracks_df = pd.concat([top_tracks_df, track_df], ignore_index=True)
 
     return top_tracks_df
 
@@ -173,7 +172,10 @@ def spotify_driver(playlist_id=None):
         )
     )
 
-    top_tracks_df = usage_analysis(sp=sp)
+    # Long term is years of data.
+    # medium the last 6 months and short_term the last month.
+    period = "short_term"
+    top_tracks_df = usage_analysis(sp=sp, period=period)
 
     # Define new scope for playlist analysis
     scope = "playlist-read-private"
@@ -192,8 +194,10 @@ def spotify_driver(playlist_id=None):
 
     # Save dataframe
     playlist_df.to_csv(f"data/{playlist_name}.csv", index=False)
+    top_tracks_df.to_csv(f"data/top_tracks_{period}.csv", index=False)
 
 
 if __name__ == "__main__":
-    playlist_id = "0mIif2dKh0Ns2RPd86w10l"
+    # $ id = 3PDP5gjPxjiXfYbgf8ll9C
+    playlist_id = "3PDP5gjPxjiXfYbgf8ll9C"
     spotify_driver(playlist_id=playlist_id)

@@ -29,10 +29,13 @@ from data import (
     generate_wordcloud,
     get_file_content_as_string,
 )
-from plotting import get_wordcloud_image, get_altair_histogram, get_audiofeature_chart
-from spotipy.oauth2 import SpotifyOAuth
-import spotipy
-from spotify import spotify_driver
+from plotting import (
+    get_wordcloud_image,
+    get_altair_histogram,
+    get_audiofeature_chart,
+    get_audiofeature_distribution,
+)
+from util.util import get_playlist_df, aquire_data_app, get_top_tracks_df
 
 
 def main():
@@ -52,6 +55,7 @@ def main():
     col2.image("images/sombra.png", width=110)
 
     # Create sidebar for selecting app pages
+    # Add aquire data string here to reactivate the functionality
     st.sidebar.title("Select an app mode below: ")
     app_mode = st.sidebar.selectbox(
         "Choose the app mode",
@@ -102,88 +106,6 @@ def main():
     )
 
 
-# To make Streamlit fast, st.cache allows us to reuse computation across runs.
-# In this common pattern, we download data from an endpoint only once.
-@st.cache
-def load_metadata(url):
-    return pd.read_csv(url)
-
-
-# Get the playlist data
-@st.cache
-def get_dataframe(data):
-
-    # Define the dtypes for columns to ensure correct format for later analysis
-    dtypes = {
-        "artist": "str",
-        "genre": "str",
-        "album": "str",
-        "track_name": "str",
-        "track_id": "str",
-        "danceability": "float",
-        "energy": "float",
-        "key": "str",
-        "loudness": "float",
-        "speechiness": "float",
-        "instrumentalness": "float",
-        "liveness": "float",
-        "valence": "float",
-        "tempo": "float",
-        "duration_ms": "int",
-        "time_signature": "int",
-        "track_popularity": "float",
-        "added_at": "str",
-    }
-    parse_dates = ["time_signature"]
-    df = pd.read_csv(data, dtype=dtypes, parse_dates=parse_dates)
-
-    return df.set_index("track_name")
-
-
-def aquire_data_app():
-    """Streamlit page for aquiring new playlist data
-
-    Args:
-
-    Returns:
-
-    """
-    scope = "playlist-read-private"
-    st.title("Download data page")
-    st.markdown(
-        """
-        Here you can enter a playlist id to download playlist data to analyze
-        """
-    )
-
-    placeholder = st.empty()
-    playlist_id = placeholder.text_input("Please enter a valid playlist id")
-    try:
-        sp = spotipy.Spotify(
-            auth_manager=SpotifyOAuth(
-                client_id=st.secrets["CLIENT_ID"],
-                client_secret=st.secrets["CLIENT_SECRET"],
-                redirect_uri=st.secrets["REDIRECT_URI"],
-                scope=scope,
-            )
-        )
-        playlist_name = sp.playlist(playlist_id)["name"]
-    except spotipy.SpotifyException as exception:
-        st.error("Please enter a valid playlist id")
-    else:
-        success = st.success(
-            f"Found playlist with name: {playlist_name}\n" f" Retrieving playlist data"
-        )
-        with st.spinner("Please wait while data is downloading"):
-            spotify_driver(playlist_id=playlist_id)
-        success.empty()
-        placeholder.empty()
-        st.success(
-            f"Finished downloading data. Please select the dataset in the dropdown and run the app."
-        )
-    return None
-
-
 def run_the_app(playlist_name="$"):
     """Run analysis page
 
@@ -198,7 +120,7 @@ def run_the_app(playlist_name="$"):
     # The same name used for the data file and wordcloud image
     # Should be extended to be a dynamic variable through user input.
 
-    music_df = get_dataframe(f"data/{playlist_name}.csv")
+    music_df = get_playlist_df(f"data/{playlist_name}.csv")
 
     # Set a headline for the current view
     st.title("Welcome to the audio feature analysis page :musical_note:")
@@ -285,7 +207,7 @@ def run_the_app(playlist_name="$"):
         data = music_df[audio_features]
         data = data.loc[tracks]
 
-        st.write("#### Chosen songs:", data.sort_index())
+        st.write("#### Chosen songs:", music_df["artist"].loc[tracks].sort_index())
 
         data = data.T.reset_index()
         data = pd.melt(data, id_vars=["index"]).rename(
@@ -326,15 +248,21 @@ def run_the_app(playlist_name="$"):
     # Write chart to page
     st.altair_chart(chart_genre_hist, use_container_width=True)
 
+    # Distribution of audio features for playlist
+    st.markdown(
+        """
+    ---
+    ### What is the audio feature distribution?
+    """
+    )
+    audio_feature_distributiuon_chart = get_audiofeature_distribution(
+        music_df[audio_features]
+    )
+    st.altair_chart(audio_feature_distributiuon_chart, use_container_width=True)
+
     # Time based analysis
-    music_df
-
-    # TODO add additional analysis
-
-    # Time based analysis
-
-
-    # TODO add more analysis
+    top_tracks_df = get_top_tracks_df
+    # TODO analysis
 
 
 # Path to the repo image folder

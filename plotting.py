@@ -110,3 +110,24 @@ def get_audiofeature_chart(data, **plt_kwargs):
         .configure_legend(symbolSize=250, titleFontSize=25, labelFontSize=25)
     )
     return chart_features
+
+
+def get_audiofeature_distribution(data, **plt_kwargs):
+
+    chart = (
+        alt.Chart(data)
+        .transform_fold(data.columns.tolist(), as_=["Audio feature", "value"])
+        .transform_density(
+            density="value",
+            bandwidth=0.1,
+            groupby=["Audio feature"],
+            extent=[0, 1],
+            counts=True,
+            steps=500,
+        )
+        .mark_area(opacity=0.7)
+        .encode(alt.X("value:Q"), alt.Y("density:Q"), alt.Color("Audio feature:N"))
+        .properties(width=400, height=400)
+    )
+
+    return chart
