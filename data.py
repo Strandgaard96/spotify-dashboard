@@ -153,7 +153,7 @@ def generate_wordcloud(genres_df=None, playlist_name=None):
     )
     genres_count, _, _ = get_genre_count(genres_df=genres_df)
     genre_wordcloud.generate_from_frequencies(genres_count)
-    genre_wordcloud.to_file(f"data/{playlist_name}.png")
+    genre_wordcloud.to_file(f"data/playlists/{playlist_name}.png")
 
 
 @st.cache(show_spinner=False)

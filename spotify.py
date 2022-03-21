@@ -193,8 +193,8 @@ def spotify_driver(playlist_id=None):
     playlist_df, playlist_name = analyze_playlist(playlist_id=playlist_id, sp=sp)
 
     # Save dataframe
-    playlist_df.to_csv(f"data/{playlist_name}.csv", index=False)
-    top_tracks_df.to_csv(f"data/top_tracks_{period}.csv", index=False)
+    playlist_df.to_csv(f"data/playlists/{playlist_name}.csv", index=False)
+    top_tracks_df.to_csv(f"data/user_data/top_tracks_{period}.csv", index=False)
 
 
 if __name__ == "__main__":
