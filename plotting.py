@@ -7,7 +7,7 @@ from PIL import Image
 @st.cache
 def get_wordcloud_image(playlist_name=None):
     """Get wordcloud image from repo (which is cached by streamlit decorator)"""
-    image = Image.open(f"data/{playlist_name}.png")
+    image = Image.open(f"data/playlists/{playlist_name}.png")
     return image
 
 
@@ -119,7 +119,7 @@ def get_audiofeature_distribution(data, **plt_kwargs):
         .transform_fold(data.columns.tolist(), as_=["Audio feature", "value"])
         .transform_density(
             density="value",
-            bandwidth=0.1,
+            bandwidth=0.05,
             groupby=["Audio feature"],
             extent=[0, 1],
             counts=True,

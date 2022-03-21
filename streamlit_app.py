@@ -64,7 +64,7 @@ def main():
     )
 
     # Get file names in folder:
-    datasets = glob("data/*.csv")
+    datasets = glob("data/playlists/*.csv")
 
     datasets = [Path(file).stem for file in datasets]
 
@@ -120,7 +120,7 @@ def run_the_app(playlist_name="$"):
     # The same name used for the data file and wordcloud image
     # Should be extended to be a dynamic variable through user input.
 
-    music_df = get_playlist_df(f"data/{playlist_name}.csv")
+    music_df = get_playlist_df(f"data/playlists/{playlist_name}.csv")
 
     # Set a headline for the current view
     st.title("Welcome to the audio feature analysis page :musical_note:")
@@ -149,7 +149,7 @@ def run_the_app(playlist_name="$"):
     )
 
     # Generate wordcloud if one does not exist for the current playlist
-    if not os.path.isfile(f"data/{playlist_name}.png"):
+    if not os.path.isfile(f"data/playlists/{playlist_name}.png"):
         generate_wordcloud(
             genres_df=music_df[["genre", "artist"]], playlist_name=playlist_name
         )
@@ -245,6 +245,13 @@ def run_the_app(playlist_name="$"):
         df_smallest, genre_artists_count, domain=[0, 2], title="40 lowest count genres"
     )
 
+    st.markdown(
+        """
+    ---
+    ### What are some more obscure genres in the playlist?
+    """
+    )
+
     # Write chart to page
     st.altair_chart(chart_genre_hist, use_container_width=True)
 
@@ -252,7 +259,7 @@ def run_the_app(playlist_name="$"):
     st.markdown(
         """
     ---
-    ### What is the audio feature distribution?
+    ### What is the audio feature distribution of the playlist?
     """
     )
     audio_feature_distributiuon_chart = get_audiofeature_distribution(
