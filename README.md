@@ -36,7 +36,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About
-I am trying to make an online spotify data exploration app for fun. 
+I am trying to make a spotify data exploration app for fun. 
 
 ### Built With
 

@@ -112,7 +112,6 @@ def analyze_playlist(playlist_id, sp):
 
     return playlist_df, playlist_name
 
-
 def usage_analysis(sp, period="long_term"):
     """Get user top tracks and artists
 
