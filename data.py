@@ -42,7 +42,7 @@ def download_file(file_path, EXTERNAL_DEPENDENCIES):
             ) as response:
                 length = int(response.info()["Content-Length"])
                 counter = 0.0
-                MEGABYTES = 2.0 ** 20.0
+                MEGABYTES = 2.0**20.0
                 while True:
                     data = response.read(8192)
                     if not data:

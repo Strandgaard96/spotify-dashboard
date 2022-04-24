@@ -35,6 +35,7 @@ from plotting import (
     get_audiofeature_chart,
     get_audiofeature_distribution,
 )
+from streaming_data import get_streaming_barplot
 from util.util import get_playlist_df, aquire_data_app, get_top_tracks_df
 
 
@@ -270,6 +271,13 @@ def run_the_app(playlist_name="$"):
     # Time based analysis
     top_tracks_df = get_top_tracks_df
     # TODO analysis
+
+    #
+    col1, _,_,_,_ = st.columns(5)
+    range = col1.slider("Select the number of top songs to show", 1, 20, 10)
+    stream_plotly = get_streaming_barplot(range=range)
+
+    st.plotly_chart(stream_plotly, use_container_width=True)
 
 
 # Path to the repo image folder

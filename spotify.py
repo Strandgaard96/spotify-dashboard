@@ -112,6 +112,7 @@ def analyze_playlist(playlist_id, sp):
 
     return playlist_df, playlist_name
 
+
 def usage_analysis(sp, period="long_term"):
     """Get user top tracks and artists
 
@@ -145,7 +146,6 @@ def usage_analysis(sp, period="long_term"):
             # Create empty dict for holding extracted features
             track_features = {}
 
-            # TODO extract features
             track_features["artist"] = track["artists"][0]["name"]
             track_features["track_name"] = track["name"]
             track_features["popularity"] = track["popularity"]
