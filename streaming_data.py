@@ -6,6 +6,7 @@ from pathlib import Path
 import plotly.graph_objects as go
 from plotly.io import show
 import plotly.express as px
+import plotly.figure_factory as ff
 
 
 def get_stream_df():
@@ -24,10 +25,12 @@ def get_stream_df():
     return stream_df
 
 
-def get_streaming_barplot(range=10):
+def get_streaming_barplot(df=None, range=10, time_range=None):
 
-    df = pd.read_csv("data/streaming_data.csv", parse_dates=True)
-    count = df.groupby(["trackName", "artistName"], as_index=False).size()
+    mask = (df["endTime"] > time_range[0]) & (df["endTime"] <= time_range[1])
+    new_df = df.loc[mask]
+
+    count = new_df.groupby(["trackName", "artistName"], as_index=False).size()
     sorted_count = count.sort_values(by="size", ascending=False)
 
     fig = px.bar(
@@ -39,7 +42,7 @@ def get_streaming_barplot(range=10):
         labels={"size": "Plays", "trackName": "Track Name"},
         height=400,
     )
-
+    fig.update_layout(font=dict(size=16))
     # Here are two ways of showing the figure
     # show(fig)
     # fig.show()
@@ -47,5 +50,5 @@ def get_streaming_barplot(range=10):
 
 
 if __name__ == "__main__":
-    #plot_bar()
+    plot_bar()
     # get_stream_df()

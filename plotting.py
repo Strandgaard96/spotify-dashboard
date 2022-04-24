@@ -2,6 +2,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 from PIL import Image
+import plotly.figure_factory as ff
 
 
 @st.cache
@@ -74,7 +75,7 @@ def get_altair_histogram(data=None, genre_artists_count=None, **plt_kwargs):
         .properties(
             width=200, height=500, title=plt_kwargs.get("title", "Genre histogram")
         )
-        .configure_axis(labelFontSize=16, titleFontSize=16, labelAngle=-45)
+        .configure_axis(labelFontSize=20, titleFontSize=20, labelAngle=-45)
         .configure_title(
             fontSize=20,
         )
@@ -112,22 +113,33 @@ def get_audiofeature_chart(data, **plt_kwargs):
     return chart_features
 
 
-def get_audiofeature_distribution(data, **plt_kwargs):
+def get_audiofeature_distribution(df, **plt_kwargs):
 
-    chart = (
-        alt.Chart(data)
-        .transform_fold(data.columns.tolist(), as_=["Audio feature", "value"])
-        .transform_density(
-            density="value",
-            bandwidth=0.05,
-            groupby=["Audio feature"],
-            extent=[0, 1],
-            counts=True,
-            steps=500,
-        )
-        .mark_area(opacity=0.7)
-        .encode(alt.X("value:Q"), alt.Y("density:Q"), alt.Color("Audio feature:N"))
-        .properties(width=400, height=400)
+    # Old plot code using altar
+    # chart = (
+    #    alt.Chart(data)
+    #    .transform_fold(data.columns.tolist(), as_=["Audio feature", "value"])
+    #    .transform_density(
+    #        density="value",
+    #        bandwidth=0.05,
+    #        groupby=["Audio feature"],
+    #        extent=[0, 1],
+    #        counts=True,
+    #        steps=500,
+    #    )
+    #    .mark_area(opacity=0.7)
+    #    .encode(alt.X("value:Q"), alt.Y("density:Q"), alt.Color("Audio feature:N"))
+    #    .properties(width=400, height=400)
+    # )
+
+    # New plot using plotly
+    fig = ff.create_distplot(
+        [df[c] for c in df.columns],
+        df.columns,
+        bin_size=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05],
+    )
+    fig.update_layout(
+        title_text="Audio feature KDE plot", width=700, height=700, font=dict(size=16)
     )
 
-    return chart
+    return fig

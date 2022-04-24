@@ -18,6 +18,7 @@ import pandas as pd
 import streamlit as st
 from glob import glob
 from pathlib import Path
+from datetime import datetime
 
 # Example data for debugging and development
 # from vega_datasets import data as data_vega
@@ -127,15 +128,13 @@ def run_the_app(playlist_name="$"):
     st.title("Welcome to the audio feature analysis page :musical_note:")
     st.write(
         """
-        Here you will find different analysis and visualizations of the playlist data.
-        
-        The user is free to interact with some of these visualizations and 
-        chose specific tracks to show analysis for.
+        Here you will find different analysis and visualizations 
+        for the playlist selected in the sidebar :sunglasses:
         """
     )
     # Uncomment these lines to peek at these DataFrames.
     st.write(
-        "#### Here we print the five first songs in the data ",
+        "##### Snippet of the data contained in the playlist:",
         music_df.head(5)[
             [
                 "artist",
@@ -191,7 +190,7 @@ def run_the_app(playlist_name="$"):
     - **Acousticness:** Acousticness of track.
     - **Energy:** Measure of intensity and activity in track.
     - **Instrumentalness:** If the track contains no vocals.
-    - **Liveness:** Detects presence of audience. If the track was performed live.
+    - **Liveness:** Detects presence of audience, eg. measures if the track was performed live.
     - **Loudness:** Loudness of track.
     - **Speechiness:** Measure the presence of spoken words in contrast to rapped/sung words.  
     - **Valence:** Indicates how positive or happy a song is.
@@ -229,8 +228,6 @@ def run_the_app(playlist_name="$"):
         """
     ---
     ### What genres do the playlist consist of?
-    
-    All the genres are visualized here in a wordcloud format:
     """
     )
     st.image(image)
@@ -261,22 +258,55 @@ def run_the_app(playlist_name="$"):
         """
     ---
     ### What is the audio feature distribution of the playlist?
+    Here we see a Kernel Density Estimate (KDE) plot together with histograms for all of the audio 
+    features. 
     """
     )
-    audio_feature_distributiuon_chart = get_audiofeature_distribution(
+    audio_feature_distribution_chart = get_audiofeature_distribution(
         music_df[audio_features]
     )
-    st.altair_chart(audio_feature_distributiuon_chart, use_container_width=True)
+    st.plotly_chart(audio_feature_distribution_chart, use_container_width=True)
 
     # Time based analysis
     top_tracks_df = get_top_tracks_df
     # TODO analysis
 
-    #
-    col1, _,_,_,_ = st.columns(5)
-    range = col1.slider("Select the number of top songs to show", 1, 20, 10)
-    stream_plotly = get_streaming_barplot(range=range)
+    # Streaming analysis
+    st.markdown(
+        """
+    ---
+    ### What songs have I listened to the most?
+    Now we look at the total listening history across playlists. 
+    Select the number of songs to show and a listening period :musical_note:
+    """
+    )
+    streaming_df = pd.read_csv("data/streaming_data.csv", parse_dates=["endTime"])
+    # Get the time range of the data
+    start_date = streaming_df["endTime"].min()
+    end_date = streaming_df["endTime"].max()
 
+    col1, col2, col3, _, _ = st.columns(5)
+    range = col1.slider(
+        "Select the number of top songs to show", 1, 40, 10, key="slice_songs"
+    )
+    time_range1 = col2.slider(
+        "Select start-date",
+        min_value=start_date,
+        max_value=end_date,
+        value=start_date.to_pydatetime(),
+        format="DD/MM/YY",
+    )
+    time_range2 = col3.slider(
+        "Select end-date",
+        min_value=start_date,
+        max_value=end_date,
+        value=end_date.to_pydatetime(),
+        format="DD/MM/YY",
+    )
+
+    stream_plotly = get_streaming_barplot(
+        df=streaming_df, range=range, time_range=(time_range1, time_range2)
+    )
     st.plotly_chart(stream_plotly, use_container_width=True)
 
 

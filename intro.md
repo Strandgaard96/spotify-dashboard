@@ -1,4 +1,4 @@
-# Spotifire
+# Spotifire :fire:
 
 Welcome to my awesome app! This is the very first prototype of my venture into streamlit. 
 Currently, the app is based on a simple analysis of some of my playlists.
