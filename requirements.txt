@@ -5,4 +5,5 @@ spotipy
 streamlit
 matplotlib
 wordcloud
+scipy
 plotly==5.7.0
