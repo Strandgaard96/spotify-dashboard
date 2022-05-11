@@ -275,12 +275,15 @@ def run_the_app(playlist_name="$"):
     st.markdown(
         """
     ---
-    ### What songs have I listened to the most?
-    Now we look at the total listening history across playlists. 
-    Select the number of songs to show and a listening period :musical_note:
+    # All time spotify streaming analysis :musical_note:
+    This section contains visualizations and analysis of my total spotify usage, from my first streams in 2010 to
+    today.
+    First, a simple overview of my most streamed songs in a given time period. 
+    
+    Select the number of songs to show and a time range.
     """
     )
-    streaming_df = pd.read_csv("data/streaming_data.csv", parse_dates=["endTime"])
+    streaming_df = pd.read_csv("data/total_streaming_data.csv", parse_dates=["endTime"])
     # Get the time range of the data
     start_date = streaming_df["endTime"].min()
     end_date = streaming_df["endTime"].max()

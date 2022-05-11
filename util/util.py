@@ -97,3 +97,66 @@ def aquire_data_app():
             f"Finished downloading data. Please select the dataset in the dropdown and run the app."
         )
     return None
+
+
+# Show main text and data upload section. Inspiration from: https://github.com/OmicEra/OmicLearn/blob/master/utils/ui_helper.py
+# TODO implement this functionality. OBS user upload data privacy issues!
+def main_text_and_data_upload(state):
+
+    with st.expander("Upload or select sample dataset (*Required)", expanded=True):
+        st.info(
+            """
+            - Upload your csv file here. Maximum size is 200 Mb.
+            - 
+            - 
+            - 
+        """
+        )
+        file_buffer = st.file_uploader("Upload your dataset below", type=["csv"])
+        st.markdown(
+            """**Note:** By uploading a file, you agree to our
+                    [Apache License](https://github.com/OmicEra/OmicLearn/blob/master/LICENSE).
+                    Data that is uploaded via the file uploader will not be saved by us;
+                    it is only stored temporarily in RAM to perform the calculations."""
+        )
+
+        if file_buffer is not None:
+            if file_buffer.name.endswith(".xlsx") or file_buffer.name.endswith(".xls"):
+                delimiter = "Excel File"
+            elif file_buffer.name.endswith(".tsv"):
+                delimiter = "Tab (\\t) for TSV"
+            else:
+                delimiter = st.selectbox(
+                    "Determine the delimiter in your dataset",
+                    ["Comma (,)", "Semicolon (;)"],
+                )
+
+            df, warnings = load_data(file_buffer, delimiter)
+
+            for warning in warnings:
+                st.warning(warning)
+            state["df"] = df
+
+        st.markdown("<hr>", unsafe_allow_html=True)
+        st.markdown("Or select sample file here:")
+        state["sample_file"] = st.selectbox(
+            "Or select sample file here:", ["None", "Alzheimer", "Sample"]
+        )
+
+        # Sample dataset / uploaded file selection
+        dataframe_length = len(state.df)
+        max_df_length = 30
+
+        if 0 < dataframe_length < max_df_length:
+            st.markdown("Using the following dataset:")
+            st.dataframe(state.df)
+        elif dataframe_length > max_df_length:
+            st.markdown("Using the following dataset:")
+            st.info(
+                f"The dataframe is too large, displaying the first {max_df_length} rows."
+            )
+            st.dataframe(state.df.head(max_df_length))
+        else:
+            st.warning("**WARNING:** No dataset uploaded or selected.")
+
+    return state
