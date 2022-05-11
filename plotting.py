@@ -2,7 +2,12 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 from PIL import Image
+import datetime as dt
+
 import plotly.figure_factory as ff
+from plotly import express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 
 @st.cache
@@ -142,4 +147,84 @@ def get_audiofeature_distribution(df, **plt_kwargs):
         title_text="Audio feature KDE plot", width=700, height=700, font=dict(size=16)
     )
 
+    return fig
+
+
+def get_temporal_distribution(df, time_range=None, **plt_kwargs):
+
+    # Restrict song name length by skipping possible feature statements in parenthesis
+    df["trackName"] = df["trackName"].str.split("(", expand=True)[0]
+
+    fig = make_subplots(
+        rows=3,
+        cols=3,
+        shared_yaxes=True,
+        subplot_titles=(
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ),
+    )
+
+    row = 0
+    col = 0
+
+    mask = (df["endTime"] > time_range[0]) & (df["endTime"] <= time_range[1])
+    df = df.loc[mask]
+
+    for i in range(7):
+
+        if i % 3 == 0:
+            row += 1
+        col = col % 3 + 1
+
+        day = df[df["endTime"].dt.dayofweek == i]
+        count = day.groupby(["trackName", "artistName"], as_index=False).size()
+        sorted_count = count.sort_values(by="size", ascending=False)
+
+        temp_fig = px.bar(
+            sorted_count[0:5],
+            x="trackName",
+            y="size",
+            hover_data=["trackName", "artistName"],
+            color="size",
+            labels={"size": "Plays", "trackName": "Track name"},
+            height=600,
+        )
+        fig.add_trace(temp_fig.data[0], row=row, col=col)
+
+    fig.update_layout(font=dict(size=16), showlegend=False, height=800)
+
+    # options
+    # coloraxis=dict(colorscale='Bluered_r'),
+    # fig.show()
+
+    return fig
+
+
+def get_streaming_barplot(df=None, range=10, time_range=None):
+
+    mask = (df["endTime"] > time_range[0]) & (df["endTime"] <= time_range[1])
+    new_df = df.loc[mask]
+
+    count = new_df.groupby(["trackName", "artistName"], as_index=False).size()
+    sorted_count = count.sort_values(by="size", ascending=False)
+
+    fig = px.bar(
+        sorted_count[0:range],
+        x="trackName",
+        y="size",
+        hover_data=["trackName", "artistName"],
+        color="size",
+        labels={"size": "Plays", "trackName": "Track Name"},
+        height=800,
+    )
+    fig.update_layout(font=dict(size=16))
+    # Here are two ways of showing the figure
+    # show(fig)
+    # fig.show()
     return fig

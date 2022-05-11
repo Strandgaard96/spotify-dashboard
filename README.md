@@ -38,9 +38,22 @@
 ## About
 I am trying to make a spotify data exploration app for fun. 
 
-### Built With
+## THIS BRANCH
+Contains code for analyzing a csv file containing listening history for the last 10 years.
+Not publicly available. 
+
+
+
+### Built with
 
 * [Streamlit](https://github.com/streamlit/streamlit)
+* [spotipy](https://github.com/plamere/spotipy)
+
+#### Visualizations with
+* [matplotlib](https://github.com/matplotlib/matplotlib)
+* [plotly](https://github.com/plotly/plotly.py)
+* [altair](https://github.com/altair-viz/altair)
+
 
 See the [Issues][issues-url] for a list of proposed features (and known issues).
 

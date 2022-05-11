@@ -31,12 +31,13 @@ from data import (
     get_file_content_as_string,
 )
 from plotting import (
+    get_temporal_distribution,
     get_wordcloud_image,
     get_altair_histogram,
     get_audiofeature_chart,
     get_audiofeature_distribution,
+    get_streaming_barplot,
 )
-from streaming_data import get_streaming_barplot
 from util.util import get_playlist_df, aquire_data_app, get_top_tracks_df
 
 
@@ -134,7 +135,7 @@ def run_the_app(playlist_name="$"):
     )
     # Uncomment these lines to peek at these DataFrames.
     st.write(
-        "##### Snippet of the data contained in the playlist:",
+        f"##### Snippet of the data contained in the selected playlist ({playlist_name}):",
         music_df.head(5)[
             [
                 "artist",
@@ -186,6 +187,7 @@ def run_the_app(playlist_name="$"):
         """
     ---
     #### **Features explained:**
+    There are a number of features and they can be defined like so: 
     - **Danceability:** Measure of how suitable a track is for dancing.
     - **Acousticness:** Acousticness of track.
     - **Energy:** Measure of intensity and activity in track.
@@ -194,6 +196,9 @@ def run_the_app(playlist_name="$"):
     - **Loudness:** Loudness of track.
     - **Speechiness:** Measure the presence of spoken words in contrast to rapped/sung words.  
     - **Valence:** Indicates how positive or happy a song is.
+    
+    Here you can select songs from the playlist below to see the distribution of features in the songs
+    
     """
     )
     tracks = st.multiselect(
@@ -228,6 +233,7 @@ def run_the_app(playlist_name="$"):
         """
     ---
     ### What genres do the playlist consist of?
+    Another way of visualizing genres in the playlist is to use a wordcloud:
     """
     )
     st.image(image)
@@ -235,18 +241,19 @@ def run_the_app(playlist_name="$"):
     # Look at obscure genres
     # Get 10 largest genres and sort by count.
     df_smallest = (
-        df.nsmallest(40, "count").sort_values(by="count", ascending=False).reset_index()
+        df.nsmallest(30, "count").sort_values(by="count", ascending=False).reset_index()
     )
 
     # Get altair object
     chart_genre_hist = get_altair_histogram(
-        df_smallest, genre_artists_count, domain=[0, 2], title="40 lowest count genres"
+        df_smallest, genre_artists_count, domain=[0, 2], title="Low count genres"
     )
 
     st.markdown(
         """
     ---
     ### What are some more obscure genres in the playlist?
+    Some genres only appear ones, usually some very niche ones. 
     """
     )
 
@@ -259,7 +266,7 @@ def run_the_app(playlist_name="$"):
     ---
     ### What is the audio feature distribution of the playlist?
     Here we see a Kernel Density Estimate (KDE) plot together with histograms for all of the audio 
-    features. 
+    features. Click the audio features on the right to remove/add them to the figure
     """
     )
     audio_feature_distribution_chart = get_audiofeature_distribution(
@@ -275,10 +282,12 @@ def run_the_app(playlist_name="$"):
     st.markdown(
         """
     ---
-    # All time spotify streaming analysis :musical_note:
+    # All-time spotify streaming analysis :musical_note:
     This section contains visualizations and analysis of my total spotify usage, from my first streams in 2010 to
     today.
-    First, a simple overview of my most streamed songs in a given time period. 
+    First, a simple overview of my most streamed songs in a given time period:
+    
+    
     
     Select the number of songs to show and a time range.
     """
@@ -311,6 +320,39 @@ def run_the_app(playlist_name="$"):
         df=streaming_df, range=range, time_range=(time_range1, time_range2)
     )
     st.plotly_chart(stream_plotly, use_container_width=True)
+
+    st.markdown(
+        """
+    ---
+    # Time based analysis :sunny: :cloud: :snowman: :umbrella:
+    How did my listening evolve over the weaks/years/seasons?
+    """
+    )
+
+    st.markdown("What is my all-time most listened monday song?!")
+
+    col1, col2, col3, _, _ = st.columns(5)
+    time_range3 = col2.slider(
+        "Select start-date",
+        min_value=start_date,
+        max_value=end_date,
+        value=start_date.to_pydatetime(),
+        format="DD/MM/YY",
+        key="start",
+    )
+    time_range4 = col3.slider(
+        "Select end-date",
+        min_value=start_date,
+        max_value=end_date,
+        value=end_date.to_pydatetime(),
+        format="DD/MM/YY",
+        key="end",
+    )
+    temporal_plotly = get_temporal_distribution(
+        df=streaming_df, time_range=(time_range3, time_range4)
+    )
+
+    st.plotly_chart(temporal_plotly, use_container_width=True)
 
 
 # Path to the repo image folder
