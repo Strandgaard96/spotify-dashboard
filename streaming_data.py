@@ -45,11 +45,11 @@ def get_stream_df():
 if __name__ == "__main__":
 
     # Debugging stuff
-    #df = pd.read_csv("data/total_streaming_data.csv", parse_dates=["endTime"])
+    # df = pd.read_csv("data/total_streaming_data.csv", parse_dates=["endTime"])
 
-    #sorted_df = df.sort_values(by="endTime", ascending=True)
-    #one = sorted_df["endTime"].iloc[0]
-    #two = sorted_df["endTime"].iloc[-1]
+    # sorted_df = df.sort_values(by="endTime", ascending=True)
+    # one = sorted_df["endTime"].iloc[0]
+    # two = sorted_df["endTime"].iloc[-1]
 
     # get_streaming_barplot(df, time_range=(one, two), range=50)
     get_stream_df()

@@ -148,7 +148,7 @@ def generate_wordcloud(genres_df=None, playlist_name=None):
         height=500,
         width=1000,
         min_font_size=4,
-        colormap=cm.inferno,
+        colormap=cm.get_cmap("tab10"),
         include_numbers=True,
     )
     genres_count, _, _ = get_genre_count(genres_df=genres_df)

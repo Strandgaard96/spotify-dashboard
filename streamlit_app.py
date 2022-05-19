@@ -20,6 +20,10 @@ from glob import glob
 from pathlib import Path
 from datetime import datetime
 
+# For getting png image from remote
+import urllib.request
+from PIL import Image
+
 # Example data for debugging and development
 # from vega_datasets import data as data_vega
 
@@ -253,7 +257,7 @@ def run_the_app(playlist_name="$"):
         """
     ---
     ### What are some more obscure genres in the playlist?
-    Some genres only appear ones, usually some very niche ones. 
+    Some genres only appear once, usually some very niche ones. 
     """
     )
 
@@ -293,9 +297,11 @@ def run_the_app(playlist_name="$"):
     """
     )
     try:
-        streaming_df = pd.read_csv("data/tota_streaming_data.csv", parse_dates=["endTime"])
+        streaming_df = pd.read_csv(
+            "data/tota_streaming_data.csv", parse_dates=["endTime"]
+        )
     except FileNotFoundError:
-        print('Data not available. Using small dataset instead')
+        print("Data not available. Using small dataset instead")
         streaming_df = pd.read_csv("data/streaming_data.csv", parse_dates=["endTime"])
     # Get the time range of the data
     start_date = streaming_df["endTime"].min()
@@ -357,6 +363,20 @@ def run_the_app(playlist_name="$"):
     )
 
     st.plotly_chart(temporal_plotly, use_container_width=True)
+
+    st.markdown(
+        """
+    ---
+    ### Congratz, you made it to the end. Thanks for checking out my random random data. Heres a comic :tiger:. 
+    """
+    )
+
+    urllib.request.urlretrieve(
+        "https://imgs.xkcd.com/comics/mainly_known_for.png", "data/comic.png"
+    )
+
+    img = Image.open("data/comic.png")
+    st.image(img, caption="Current comic from xkcd")
 
 
 # Path to the repo image folder

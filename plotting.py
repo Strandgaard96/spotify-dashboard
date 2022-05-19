@@ -209,6 +209,8 @@ def get_temporal_distribution(df, time_range=None, **plt_kwargs):
 def get_streaming_barplot(df=None, range=10, time_range=None):
 
     mask = (df["endTime"] > time_range[0]) & (df["endTime"] <= time_range[1])
+
+    df["trackName"] = df["trackName"].str.split("(", expand=True)[0]
     new_df = df.loc[mask]
 
     count = new_df.groupby(["trackName", "artistName"], as_index=False).size()
@@ -221,7 +223,7 @@ def get_streaming_barplot(df=None, range=10, time_range=None):
         hover_data=["trackName", "artistName"],
         color="size",
         labels={"size": "Plays", "trackName": "Track Name"},
-        height=800,
+        height=600,
     )
     fig.update_layout(font=dict(size=16))
     # Here are two ways of showing the figure
