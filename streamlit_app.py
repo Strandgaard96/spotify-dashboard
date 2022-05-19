@@ -292,7 +292,11 @@ def run_the_app(playlist_name="$"):
     Select the number of songs to show and a time range.
     """
     )
-    streaming_df = pd.read_csv("data/total_streaming_data.csv", parse_dates=["endTime"])
+    try:
+        streaming_df = pd.read_csv("data/tota_streaming_data.csv", parse_dates=["endTime"])
+    except FileNotFoundError:
+        print('Data not available. Using small dataset instead')
+        streaming_df = pd.read_csv("data/streaming_data.csv", parse_dates=["endTime"])
     # Get the time range of the data
     start_date = streaming_df["endTime"].min()
     end_date = streaming_df["endTime"].max()
