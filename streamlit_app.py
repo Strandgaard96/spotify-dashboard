@@ -21,7 +21,11 @@ from pathlib import Path
 from datetime import datetime
 
 # For getting png image from remote
+from io import BytesIO
+from random import randint
 import urllib.request
+import requests
+import json
 from PIL import Image
 
 # Example data for debugging and development
@@ -137,9 +141,9 @@ def run_the_app(playlist_name="$"):
         for the playlist selected in the sidebar :sunglasses:
         """
     )
-    # Uncomment these lines to peek at these DataFrames.
-    st.write(
-        f"##### Snippet of the data contained in the selected playlist ({playlist_name}):",
+
+    st.markdown(f"##### Snippet of the data contained in the selected playlist ({playlist_name}):")
+    st.dataframe(
         music_df.head(5)[
             [
                 "artist",
@@ -297,9 +301,17 @@ def run_the_app(playlist_name="$"):
     """
     )
     try:
+        dtypes = {
+            "ms_played": "int",
+            "trackName": "str",
+            "artistName": "str",
+            "reason_start": "str",
+            "reason_end": "str",
+            "shuffle": "bool",
+            "skipped": "float"
+        }
         streaming_df = pd.read_csv(
-            "data/tota_streaming_data.csv", parse_dates=["endTime"]
-        )
+            "data/total_streaming_data.csv", parse_dates=["endTime"], dtype=dtypes)
     except FileNotFoundError:
         print("Data not available. Using small dataset instead")
         streaming_df = pd.read_csv("data/streaming_data.csv", parse_dates=["endTime"])
@@ -371,11 +383,28 @@ def run_the_app(playlist_name="$"):
     """
     )
 
-    urllib.request.urlretrieve(
-        "https://imgs.xkcd.com/comics/mainly_known_for.png", "data/comic.png"
-    )
+    try:
+        with requests.Session() as s:
+            content = s.get("https://xkcd.com/info.0.json").content.decode()
+            data = json.loads(content)
+            HighestNumber = data["num"]
 
-    img = Image.open("data/comic.png")
+            random=True
+            if random:
+                rand_digits = randint(1, HighestNumber)
+                endpoint = "https://xkcd.com/{}/info.0.json".format(rand_digits)
+                content = s.get(endpoint).content.decode()
+                data = json.loads(content)
+                res = s.get(data["img"])
+                img = Image.open(BytesIO(res.content))
+            else:
+                res = s.get(data["img"])
+                img = Image.open(BytesIO(res.content))
+    except requests.ConnectionError:
+        img = Image.open("data/comic.png")
+        #error_image = Image.open("assets/xkcd_404.jpg")
+        #error_image.show()
+
     st.image(img, caption="Current comic from xkcd")
 
 
