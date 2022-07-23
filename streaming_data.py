@@ -1,6 +1,7 @@
+import pandas as pd
 from pathlib import Path
 
-import pandas as pd
+import streamlit as st
 
 
 def get_stream_df():
@@ -54,3 +55,25 @@ if __name__ == "__main__":
 
     # get_streaming_barplot(df, time_range=(one, two), range=50)
     get_stream_df()
+
+
+@st.cache
+def get_streaming_df():
+    data = Path("data/total_streaming_data.csv")
+    if data.is_file():
+        dtypes = {
+            "ms_played": "int",
+            "trackName": "str",
+            "artistName": "str",
+            "reason_start": "str",
+            "reason_end": "str",
+            "shuffle": "bool",
+            "skipped": "float",
+        }
+        df = pd.read_csv(
+            "data/total_streaming_data.csv", parse_dates=["endTime"], dtype=dtypes
+        )
+    else:
+        print("Data not available. Using small dataset instead")
+        df = pd.read_csv("data/streaming_data.csv", parse_dates=["endTime"])
+    return df

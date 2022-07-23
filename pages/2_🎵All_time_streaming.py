@@ -1,11 +1,4 @@
 import streamlit as st
-import pandas as pd
-from data import (
-    download_file,
-    get_genre_count,
-    generate_wordcloud,
-    get_file_content_as_string,
-)
 from plotting import (
     get_temporal_distribution,
     get_streaming_barplot,
@@ -15,9 +8,10 @@ from plotting import (
 from PIL import Image
 from io import BytesIO
 from random import randint
-import urllib.request
 import requests
 import json
+
+from streaming_data import get_streaming_df
 
 st.set_page_config(page_title="Streaming", layout="wide", page_icon=":fire:")
 
@@ -35,22 +29,11 @@ First, a simple overview of my most streamed songs in a given time period:
 Select the number of songs to show and a time range.
 """
 )
-try:
-    dtypes = {
-        "ms_played": "int",
-        "trackName": "str",
-        "artistName": "str",
-        "reason_start": "str",
-        "reason_end": "str",
-        "shuffle": "bool",
-        "skipped": "float",
-    }
-    streaming_df = pd.read_csv(
-        "data/total_streaming_data.csv", parse_dates=["endTime"], dtype=dtypes
-    )
-except FileNotFoundError:
-    print("Data not available. Using small dataset instead")
-    streaming_df = pd.read_csv("data/streaming_data.csv", parse_dates=["endTime"])
+
+df = get_streaming_df()
+# Copy to be able to change the df. The original df is cached.
+streaming_df = df.copy()
+
 # Get the time range of the data
 start_date = streaming_df["endTime"].min()
 end_date = streaming_df["endTime"].max()
