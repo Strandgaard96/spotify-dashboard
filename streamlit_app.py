@@ -12,41 +12,32 @@ Example:
 TODOs:
     * Module todos
 """
+import json
 import os
-
-import pandas as pd
-import streamlit as st
-from glob import glob
-from pathlib import Path
+import urllib.request
 from datetime import datetime
-
+from glob import glob
 # For getting png image from remote
 from io import BytesIO
+from pathlib import Path
 from random import randint
-import urllib.request
+
+import pandas as pd
 import requests
-import json
+import streamlit as st
 from PIL import Image
+
+# Get plotting utility
+from data import (download_file, generate_wordcloud,
+                  get_file_content_as_string, get_genre_count)
+from plotting import (get_altair_histogram, get_audiofeature_chart,
+                      get_audiofeature_distribution, get_streaming_barplot,
+                      get_temporal_distribution, get_wordcloud_image)
+from util.util import aquire_data_app, get_playlist_df, get_top_tracks_df
 
 # Example data for debugging and development
 # from vega_datasets import data as data_vega
 
-# Get plotting utility
-from data import (
-    download_file,
-    get_genre_count,
-    generate_wordcloud,
-    get_file_content_as_string,
-)
-from plotting import (
-    get_temporal_distribution,
-    get_wordcloud_image,
-    get_altair_histogram,
-    get_audiofeature_chart,
-    get_audiofeature_distribution,
-    get_streaming_barplot,
-)
-from util.util import get_playlist_df, aquire_data_app, get_top_tracks_df
 
 
 def main():
@@ -383,13 +374,18 @@ def run_the_app(playlist_name="$"):
     """
     )
 
+    img = get_comic()
+    st.image(img, caption="Current comic from xkcd")
+
+
+def get_comic():
     try:
         with requests.Session() as s:
             content = s.get("https://xkcd.com/info.0.json").content.decode()
             data = json.loads(content)
             HighestNumber = data["num"]
 
-            random=True
+            random = True
             if random:
                 rand_digits = randint(1, HighestNumber)
                 endpoint = "https://xkcd.com/{}/info.0.json".format(rand_digits)
@@ -402,10 +398,9 @@ def run_the_app(playlist_name="$"):
                 img = Image.open(BytesIO(res.content))
     except requests.ConnectionError:
         img = Image.open("data/comic.png")
-        #error_image = Image.open("assets/xkcd_404.jpg")
-        #error_image.show()
-
-    st.image(img, caption="Current comic from xkcd")
+        # error_image = Image.open("assets/xkcd_404.jpg")
+        # error_image.show()
+    return img
 
 
 # Path to the repo image folder

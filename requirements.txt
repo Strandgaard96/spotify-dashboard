@@ -6,4 +6,5 @@ streamlit
 matplotlib
 wordcloud
 scipy
+isort
 plotly==5.7.0

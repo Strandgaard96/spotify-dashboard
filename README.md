@@ -38,11 +38,6 @@
 ## About
 I am trying to make a spotify data exploration app for fun. 
 
-## THIS BRANCH
-Contains code for analyzing a csv file containing listening history for the last 10 years.
-Not publicly available. 
-
-
 
 ### Built with
 

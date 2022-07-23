@@ -4,10 +4,8 @@ Module responsible for handling spotify interaction.
 import numpy as np
 import pandas as pd
 import spotipy
-
 # Not sure how this import will affect the app
 import streamlit as st
-
 from spotipy.oauth2 import SpotifyOAuth
 
 

@@ -1,10 +1,11 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 
 def get_stream_df():
 
-    path = Path("data/TOTALSTREAM").rglob("*endsong*.json")
+    path = Path("data/MyData").rglob("*endsong*.json")
     stream_df = pd.concat((pd.read_json(f, convert_dates=["ts"]) for f in path))
 
     stream_df.rename(

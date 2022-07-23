@@ -4,7 +4,7 @@ Module for doing playlist manipulations
 import os
 import sqlite3
 import urllib
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 
 import pandas
 import pandas as pd
