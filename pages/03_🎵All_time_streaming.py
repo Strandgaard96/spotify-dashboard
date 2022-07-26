@@ -1,17 +1,12 @@
 import streamlit as st
-from plotting import (
-    get_temporal_distribution,
-    get_streaming_barplot,
-)
+
+from data import get_comic
+from plotting import (get_most_played_animation, get_streaming_barplot,
+                      get_temporal_distribution)
+from streaming_data import get_streaming_df
 
 # For getting png image from remote
-from PIL import Image
-from io import BytesIO
-from random import randint
-import requests
-import json
 
-from streaming_data import get_streaming_df
 
 st.set_page_config(page_title="Streaming", layout="wide", page_icon=":fire:")
 # Hack to try and center image.
@@ -25,7 +20,6 @@ st.sidebar.markdown(
      height="16">&nbsp by <a href="https://github.com/Strandgaard96">Strandgaard96</a></h4>',
     unsafe_allow_html=True,
 )
-
 
 
 # Streaming analysis
@@ -108,6 +102,21 @@ temporal_plotly = get_temporal_distribution(
 
 st.plotly_chart(temporal_plotly, use_container_width=True)
 
+
+st.markdown(
+    """
+---
+# Most played as function of year
+I am questioning how useful this visualization is, but i made so here it is. 
+"""
+)
+
+plotly_most_played_animated = get_most_played_animation(streaming_df=streaming_df)
+st.plotly_chart(plotly_most_played_animated, use_container_width=True)
+
+
+
+
 st.markdown(
     """
 ---
@@ -115,26 +124,5 @@ st.markdown(
 """
 )
 
-try:
-    with requests.Session() as s:
-        content = s.get("https://xkcd.com/info.0.json").content.decode()
-        data = json.loads(content)
-        HighestNumber = data["num"]
-
-        random = True
-        if random:
-            rand_digits = randint(1, HighestNumber)
-            endpoint = "https://xkcd.com/{}/info.0.json".format(rand_digits)
-            content = s.get(endpoint).content.decode()
-            data = json.loads(content)
-            res = s.get(data["img"])
-            img = Image.open(BytesIO(res.content))
-        else:
-            res = s.get(data["img"])
-            img = Image.open(BytesIO(res.content))
-except requests.ConnectionError:
-    img = Image.open("data/comic.png")
-    # error_image = Image.open("assets/xkcd_404.jpg")
-    # error_image.show()
-
+img = get_comic()
 st.image(img, caption="Current comic from xkcd")

@@ -1,6 +1,6 @@
 import streamlit as st
-from util.util import get_file_content_as_string
 
+from util.util import get_file_content_as_string
 
 st.set_page_config(page_title="Intro", layout="wide", page_icon=":fire:")
 
@@ -20,5 +20,3 @@ st.sidebar.markdown(
 )
 
 st.sidebar.success("Select a page above!")
-
-

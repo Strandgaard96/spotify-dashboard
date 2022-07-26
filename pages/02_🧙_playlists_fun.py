@@ -13,31 +13,25 @@ TODOs:
     * Module todos
 """
 import os
+from datetime import datetime
+from glob import glob
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from glob import glob
-from pathlib import Path
-from datetime import datetime
-
 # For getting png image from remote
 from PIL import Image
 
 # Example data for debugging and development
 # from vega_datasets import data as data_vega
 # Get plotting utility
-from data import (
-    get_genre_count,
-    generate_wordcloud, get_wordcloud_image,
-)
-from plotting import (
-    get_temporal_distribution,
-    get_altair_histogram,
-    get_audiofeature_chart,
-    get_audiofeature_distribution,
-    get_streaming_barplot,
-)
-from util.util import get_playlist_df, aquire_data_app, get_top_tracks_df, get_file_content_as_string, download_file
+from data import generate_wordcloud, get_genre_count, get_wordcloud_image
+from plotting import (get_altair_histogram, get_audiofeature_chart,
+                      get_audiofeature_distribution, get_streaming_barplot,
+                      get_temporal_distribution)
+from util.util import (aquire_data_app, download_file,
+                       get_file_content_as_string, get_playlist_df,
+                       get_top_tracks_df)
 
 # Path to the repo image folder
 REPO_URL_ROOT = (
@@ -65,8 +59,6 @@ st.sidebar.markdown(
      height="16">&nbsp by <a href="https://github.com/Strandgaard96">Strandgaard96</a></h4>',
     unsafe_allow_html=True,
 )
-
-
 
 
 # Get file names in folder:

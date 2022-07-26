@@ -1,12 +1,16 @@
 """
 Module for doing playlist manipulations
 """
-from collections import defaultdict, Counter
+import json
+from collections import Counter, defaultdict
+from io import BytesIO
+from random import randint
 
 import pandas as pd
+import requests
 import streamlit as st
-from PIL import Image
 from matplotlib import cm
+from PIL import Image
 from wordcloud import WordCloud
 
 
@@ -106,3 +110,28 @@ def get_wordcloud_image(playlist_name=None):
     """Get wordcloud image from repo (which is cached by streamlit decorator)"""
     image = Image.open(f"data/playlists/{playlist_name}.png")
     return image
+
+
+def get_comic():
+    try:
+        with requests.Session() as s:
+            content = s.get("https://xkcd.com/info.0.json").content.decode()
+            data = json.loads(content)
+            HighestNumber = data["num"]
+
+            random = True
+            if random:
+                rand_digits = randint(1, HighestNumber)
+                endpoint = "https://xkcd.com/{}/info.0.json".format(rand_digits)
+                content = s.get(endpoint).content.decode()
+                data = json.loads(content)
+                res = s.get(data["img"])
+                img = Image.open(BytesIO(res.content))
+            else:
+                res = s.get(data["img"])
+                img = Image.open(BytesIO(res.content))
+    except requests.ConnectionError:
+        img = Image.open("data/comic.png")
+        # error_image = Image.open("assets/xkcd_404.jpg")
+        # error_image.show()
+    return img

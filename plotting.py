@@ -1,7 +1,6 @@
 import datetime as dt
 
 import altair as alt
-
 import plotly.figure_factory as ff
 from plotly import express as px
 from plotly.subplots import make_subplots
@@ -219,4 +218,18 @@ def get_streaming_barplot(df=None, range=10, time_range=None):
     # Here are two ways of showing the figure
     # show(fig)
     # fig.show()
+    return fig
+def get_most_played_animation(streaming_df = None):
+
+    df = streaming_df.groupby([(streaming_df.endTime.dt.year), (streaming_df.trackName)]) \
+        .agg({'ms_played': 'sum', 'trackName': 'count', 'artistName': 'first'}).rename(
+        columns={'trackName': 'count'}).reset_index()
+    df = df.groupby(['endTime']).apply(lambda x: x.nlargest(100, ['count'])).reset_index(drop=True)
+
+    fig = px.scatter(df, x="ms_played", y="count", animation_frame="endTime",
+               size='ms_played', hover_name="trackName", hover_data={'artistName': True},
+               log_x=True, size_max=60, range_y=[0, 200], range_x=[10000, 25000000])
+
+    fig.update_layout(font=dict(size=16), showlegend=False, height=600)
+
     return fig
