@@ -44,19 +44,6 @@ def convert_stream_data():
     return stream_df
 
 
-if __name__ == "__main__":
-
-    # Debugging stuff
-    # df = pd.read_csv("data/total_streaming_data.csv", parse_dates=["endTime"])
-
-    # sorted_df = df.sort_values(by="endTime", ascending=True)
-    # one = sorted_df["endTime"].iloc[0]
-    # two = sorted_df["endTime"].iloc[-1]
-
-    # get_streaming_barplot(df, time_range=(one, two), range=50)
-    convert_stream_data()
-
-
 @st.cache
 def get_streaming_df():
     data = Path("data/total_streaming_data.csv")
@@ -77,3 +64,16 @@ def get_streaming_df():
         print("Data not available. Using small dataset instead")
         df = pd.read_csv("data/streaming_data.csv", parse_dates=["endTime"])
     return df
+
+
+if __name__ == "__main__":
+
+    # Debugging stuff
+    # df = pd.read_csv("data/total_streaming_data.csv", parse_dates=["endTime"])
+
+    # sorted_df = df.sort_values(by="endTime", ascending=True)
+    # one = sorted_df["endTime"].iloc[0]
+    # two = sorted_df["endTime"].iloc[-1]
+
+    # get_streaming_barplot(df, time_range=(one, two), range=50)
+    convert_stream_data()

@@ -79,7 +79,7 @@ How did my listening evolve over the weaks/years/seasons?
 
 st.markdown("What is my all-time most listened monday song?!")
 
-col1, col2, col3, _, _ = st.columns(5)
+col1, col2, col3, col4, _ = st.columns(5)
 time_range3 = col2.slider(
     "Select start-date",
     min_value=start_date,
@@ -96,8 +96,13 @@ time_range4 = col3.slider(
     format="DD/MM/YY",
     key="end",
 )
+
+season = col4.selectbox(
+     'What season to filter on?',
+     ('Winter', 'Summer', 'Spring', 'Autumn', None))
+
 temporal_plotly = get_temporal_distribution(
-    df=streaming_df, time_range=(time_range3, time_range4)
+    df=streaming_df, time_range=(time_range3, time_range4), season=season
 )
 
 st.plotly_chart(temporal_plotly, use_container_width=True)

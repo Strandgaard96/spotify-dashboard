@@ -139,7 +139,7 @@ def get_audiofeature_distribution(df, **plt_kwargs):
     return fig
 
 
-def get_temporal_distribution(df, time_range=None, **plt_kwargs):
+def get_temporal_distribution(df, time_range=None,season=None, **plt_kwargs):
 
     # Restrict song name length by skipping possible feature statements in parenthesis
     df["trackName"] = df["trackName"].str.split("(", expand=True)[0]
@@ -164,6 +164,12 @@ def get_temporal_distribution(df, time_range=None, **plt_kwargs):
 
     mask = (df["endTime"] > time_range[0]) & (df["endTime"] <= time_range[1])
     df = df.loc[mask]
+
+    seasons = {'Winter':(12,1,2),'Summer':(6,7,8),'Spring':(3,4,5),'Autumn':(9,10,11)}
+
+    # Limit to chosen seaon
+    if season:
+        df = getMonths(df,*seasons[season])
 
     for i in range(7):
 
@@ -194,6 +200,8 @@ def get_temporal_distribution(df, time_range=None, **plt_kwargs):
 
     return fig
 
+def getMonths(input, m1, m2, m3):
+    return input.loc[(input.endTime.dt.month==m1) | (input.endTime.dt.month==m2) | (input.endTime.dt.month==m3)]
 
 def get_streaming_barplot(df=None, range=10, time_range=None):
 
