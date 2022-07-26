@@ -60,7 +60,7 @@ if __name__ == "__main__":
 @st.cache
 def get_streaming_df():
     data = Path("data/total_streaming_data.csv")
-    if data.is_file():
+    if not data.is_file():
         dtypes = {
             "ms_played": "int",
             "trackName": "str",
