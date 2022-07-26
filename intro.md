@@ -4,6 +4,6 @@ Welcome to my awesome app! This is the very first prototype of my venture into s
 Currently, the app is based on a simple analysis of some of my playlists.
  :point_down:
 
-Select **Run the app** in the sidebar to see som cool data!
+Select some of the pages in the sidebar to see som cool data!
 
 [//]: # (Need more extensive intro page)

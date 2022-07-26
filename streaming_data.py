@@ -4,7 +4,7 @@ from pathlib import Path
 import streamlit as st
 
 
-def get_stream_df():
+def convert_stream_data():
 
     path = Path("data/MyData").rglob("*endsong*.json")
     stream_df = pd.concat((pd.read_json(f, convert_dates=["ts"]) for f in path))
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # two = sorted_df["endTime"].iloc[-1]
 
     # get_streaming_barplot(df, time_range=(one, two), range=50)
-    get_stream_df()
+    convert_stream_data()
 
 
 @st.cache

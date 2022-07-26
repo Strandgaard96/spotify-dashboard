@@ -27,20 +27,17 @@ from PIL import Image
 # from vega_datasets import data as data_vega
 # Get plotting utility
 from data import (
-    download_file,
     get_genre_count,
-    generate_wordcloud,
-    get_file_content_as_string,
+    generate_wordcloud, get_wordcloud_image,
 )
 from plotting import (
     get_temporal_distribution,
-    get_wordcloud_image,
     get_altair_histogram,
     get_audiofeature_chart,
     get_audiofeature_distribution,
     get_streaming_barplot,
 )
-from util.util import get_playlist_df, aquire_data_app, get_top_tracks_df
+from util.util import get_playlist_df, aquire_data_app, get_top_tracks_df, get_file_content_as_string, download_file
 
 # Path to the repo image folder
 REPO_URL_ROOT = (
@@ -53,18 +50,24 @@ EXTERNAL_DEPENDENCIES = {}
 
 st.set_page_config(page_title="Spotifire", layout="wide", page_icon=":fire:")
 
-readme_text = st.markdown(get_file_content_as_string("intro.md"))
-st.sidebar.success('Select other pages to see what the app has to offer".')
-
 # Download external dependencies.
 for filename in EXTERNAL_DEPENDENCIES.keys():
     download_file(filename, EXTERNAL_DEPENDENCIES)
+
 # Hack to try and center image.
 _, col2, _ = st.sidebar.columns([1, 1, 1])
 # Sombra logo in sidebar
 col2.image("images/sombra.png", width=110)
+# What to put under the sidebar
+st.sidebar.markdown(
+    '<h4>Made in &nbsp<img src="https://streamlit.io/images/brand/streamlit-mark-color.png"\
+     alt="Streamlit logo" \
+     height="16">&nbsp by <a href="https://github.com/Strandgaard96">Strandgaard96</a></h4>',
+    unsafe_allow_html=True,
+)
 
-st.sidebar.title("Sidebar")
+
+
 
 # Get file names in folder:
 datasets = glob("data/playlists/*.csv")

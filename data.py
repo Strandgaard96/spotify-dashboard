@@ -1,68 +1,13 @@
 """
 Module for doing playlist manipulations
 """
-import os
-import sqlite3
-import urllib
-from collections import Counter, defaultdict
+from collections import defaultdict, Counter
 
-import pandas
 import pandas as pd
 import streamlit as st
+from PIL import Image
 from matplotlib import cm
 from wordcloud import WordCloud
-
-
-def download_file(file_path, EXTERNAL_DEPENDENCIES):
-    """
-    Downloads files specified by EXTERNAL_DEPENDENCIES to current directory.
-    The keys are the filenames of the downloaded files.
-    Args:
-        file_path (str): Path to file to download
-    Returns:
-        None
-    """
-
-    # Don't download the file twice. (If possible, verify the download using
-    # the file length.)
-    if os.path.exists(file_path):
-        if "size" not in EXTERNAL_DEPENDENCIES[file_path]:
-            return
-        elif os.path.getsize(file_path) == EXTERNAL_DEPENDENCIES[file_path]["size"]:
-            return
-
-    # These are handles to two visual elements to animate.
-    weights_warning, progress_bar = None, None
-    try:
-        weights_warning = st.warning("Downloading %s..." % file_path)
-        progress_bar = st.progress(0)
-        with open(file_path, "wb") as output_file:
-            with urllib.request.urlopen(
-                EXTERNAL_DEPENDENCIES[file_path]["url"]
-            ) as response:
-                length = int(response.info()["Content-Length"])
-                counter = 0.0
-                MEGABYTES = 2.0**20.0
-                while True:
-                    data = response.read(8192)
-                    if not data:
-                        break
-                    counter += len(data)
-                    output_file.write(data)
-
-                    # We perform animation by overwriting the elements.
-                    weights_warning.warning(
-                        "Downloading %s... (%6.2f/%6.2f MB)"
-                        % (file_path, counter / MEGABYTES, length / MEGABYTES)
-                    )
-                    progress_bar.progress(min(counter / length, 1.0))
-
-    # Finally, we remove these visual elements by calling .empty().
-    finally:
-        if weights_warning is not None:
-            weights_warning.empty()
-        if progress_bar is not None:
-            progress_bar.empty()
 
 
 def get_genre_count(genres_df=None):
@@ -156,12 +101,8 @@ def generate_wordcloud(genres_df=None, playlist_name=None):
     genre_wordcloud.to_file(f"data/playlists/{playlist_name}.png")
 
 
-@st.cache(show_spinner=False)
-def get_file_content_as_string(path):
-    """Get markdown file from repo and return as string"""
-    url = (
-        "https://raw.githubusercontent.com/Strandgaard96/spotify-dashboard/master/"
-        + path
-    )
-    response = urllib.request.urlopen(url)
-    return response.read().decode("utf-8")
+@st.cache
+def get_wordcloud_image(playlist_name=None):
+    """Get wordcloud image from repo (which is cached by streamlit decorator)"""
+    image = Image.open(f"data/playlists/{playlist_name}.png")
+    return image

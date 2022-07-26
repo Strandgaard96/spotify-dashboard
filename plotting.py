@@ -1,20 +1,10 @@
 import datetime as dt
 
 import altair as alt
-import pandas as pd
+
 import plotly.figure_factory as ff
-import plotly.graph_objects as go
-import streamlit as st
-from PIL import Image
 from plotly import express as px
 from plotly.subplots import make_subplots
-
-
-@st.cache
-def get_wordcloud_image(playlist_name=None):
-    """Get wordcloud image from repo (which is cached by streamlit decorator)"""
-    image = Image.open(f"data/playlists/{playlist_name}.png")
-    return image
 
 
 # domain=None, title=None
