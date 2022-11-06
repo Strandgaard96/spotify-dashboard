@@ -1,5 +1,3 @@
-import datetime as dt
-
 import altair as alt
 import plotly.figure_factory as ff
 from plotly import express as px
@@ -8,7 +6,7 @@ from plotly.subplots import make_subplots
 
 # domain=None, title=None
 def get_altair_histogram(data=None, genre_artists_count=None, **plt_kwargs):
-    """Create altair chart object
+    """Create altair chart object.
 
     Args:
         data (DataFrame): Contains genres and the counts of each genre
@@ -19,7 +17,8 @@ def get_altair_histogram(data=None, genre_artists_count=None, **plt_kwargs):
     """
 
     def _applyfunc(genre, artists):
-        "Helper func to convert artist column format to tooltip suitable string"
+        """Helper func to convert artist column format to tooltip suitable
+        string."""
 
         # How many artists to include in tooltip is given by num
         # 5 is default
@@ -81,7 +80,7 @@ def get_altair_histogram(data=None, genre_artists_count=None, **plt_kwargs):
 
 
 def get_audiofeature_chart(data, **plt_kwargs):
-    """Plot audio features area plot
+    """Plot audio features area plot.
 
     Args:
         data (DataFrame): Contains audio feature data
@@ -139,7 +138,7 @@ def get_audiofeature_distribution(df, **plt_kwargs):
     return fig
 
 
-def get_temporal_distribution(df, time_range=None,season=None, **plt_kwargs):
+def get_temporal_distribution(df, time_range=None, season=None, **plt_kwargs):
 
     # Restrict song name length by skipping possible feature statements in parenthesis
     df["trackName"] = df["trackName"].str.split("(", expand=True)[0]
@@ -165,11 +164,16 @@ def get_temporal_distribution(df, time_range=None,season=None, **plt_kwargs):
     mask = (df["endTime"] > time_range[0]) & (df["endTime"] <= time_range[1])
     df = df.loc[mask]
 
-    seasons = {'Winter':(12,1,2),'Summer':(6,7,8),'Spring':(3,4,5),'Autumn':(9,10,11)}
+    seasons = {
+        "Winter": (12, 1, 2),
+        "Summer": (6, 7, 8),
+        "Spring": (3, 4, 5),
+        "Autumn": (9, 10, 11),
+    }
 
     # Limit to chosen seaon
     if season:
-        df = getMonths(df,*seasons[season])
+        df = getMonths(df, *seasons[season])
 
     for i in range(7):
 
@@ -200,8 +204,14 @@ def get_temporal_distribution(df, time_range=None,season=None, **plt_kwargs):
 
     return fig
 
+
 def getMonths(input, m1, m2, m3):
-    return input.loc[(input.endTime.dt.month==m1) | (input.endTime.dt.month==m2) | (input.endTime.dt.month==m3)]
+    return input.loc[
+        (input.endTime.dt.month == m1)
+        | (input.endTime.dt.month == m2)
+        | (input.endTime.dt.month == m3)
+    ]
+
 
 def get_streaming_barplot(df=None, range=10, time_range=None):
 
@@ -227,16 +237,35 @@ def get_streaming_barplot(df=None, range=10, time_range=None):
     # show(fig)
     # fig.show()
     return fig
-def get_most_played_animation(streaming_df = None):
 
-    df = streaming_df.groupby([(streaming_df.endTime.dt.year), (streaming_df.trackName)]) \
-        .agg({'ms_played': 'sum', 'trackName': 'count', 'artistName': 'first'}).rename(
-        columns={'trackName': 'count'}).reset_index()
-    df = df.groupby(['endTime']).apply(lambda x: x.nlargest(100, ['count'])).reset_index(drop=True)
 
-    fig = px.scatter(df, x="ms_played", y="count", animation_frame="endTime",
-               size='ms_played', hover_name="trackName", hover_data={'artistName': True},
-               log_x=True, size_max=60, range_y=[0, 200], range_x=[10000, 25000000])
+def get_most_played_animation(streaming_df=None):
+
+    df = (
+        streaming_df.groupby([(streaming_df.endTime.dt.year), (streaming_df.trackName)])
+        .agg({"ms_played": "sum", "trackName": "count", "artistName": "first"})
+        .rename(columns={"trackName": "count"})
+        .reset_index()
+    )
+    df = (
+        df.groupby(["endTime"])
+        .apply(lambda x: x.nlargest(100, ["count"]))
+        .reset_index(drop=True)
+    )
+
+    fig = px.scatter(
+        df,
+        x="ms_played",
+        y="count",
+        animation_frame="endTime",
+        size="ms_played",
+        hover_name="trackName",
+        hover_data={"artistName": True},
+        log_x=True,
+        size_max=60,
+        range_y=[0, 200],
+        range_x=[10000, 25000000],
+    )
 
     fig.update_layout(font=dict(size=16), showlegend=False, height=600)
 

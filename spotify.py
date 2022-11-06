@@ -1,9 +1,8 @@
-"""
-Module responsible for handling spotify interaction.
-"""
+"""Module responsible for handling spotify interaction."""
 import numpy as np
 import pandas as pd
 import spotipy
+
 # Not sure how this import will affect the app
 import streamlit as st
 from spotipy.oauth2 import SpotifyOAuth
@@ -12,7 +11,7 @@ from spotipy.oauth2 import SpotifyOAuth
 # Inspiration taken from this:
 # https://www.linkedin.com/pulse/extracting-your-fav-playlist-info-spotifys-api-samantha-jones/
 def analyze_playlist(playlist_id, sp):
-    """Get playlist data from given id and authentification manager
+    """Get playlist data from given id and authentification manager.
 
     Args:
         playlist_id (str): ID of playlist to get data for.
@@ -112,7 +111,7 @@ def analyze_playlist(playlist_id, sp):
 
 
 def usage_analysis(sp, period="long_term"):
-    """Get user top tracks and artists
+    """Get user top tracks and artists.
 
     Args:
         sp: spotipy api handler.

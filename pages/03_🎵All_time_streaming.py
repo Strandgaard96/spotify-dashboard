@@ -1,8 +1,11 @@
 import streamlit as st
 
 from data import get_comic
-from plotting import (get_most_played_animation, get_streaming_barplot,
-                      get_temporal_distribution)
+from plotting import (
+    get_most_played_animation,
+    get_streaming_barplot,
+    get_temporal_distribution,
+)
 from streaming_data import get_streaming_df
 
 # For getting png image from remote
@@ -98,8 +101,8 @@ time_range4 = col3.slider(
 )
 
 season = col4.selectbox(
-     'What season to filter on?',
-     ('Winter', 'Summer', 'Spring', 'Autumn', None))
+    "What season to filter on?", ("Winter", "Summer", "Spring", "Autumn", None)
+)
 
 temporal_plotly = get_temporal_distribution(
     df=streaming_df, time_range=(time_range3, time_range4), season=season
@@ -112,7 +115,7 @@ st.markdown(
     """
 ---
 # Most played as function of year
-I am questioning how useful this visualization is, but i made so here it is. 
+I am questioning how useful this visualization is, but i made so here it is.
 """
 )
 
@@ -120,12 +123,10 @@ plotly_most_played_animated = get_most_played_animation(streaming_df=streaming_d
 st.plotly_chart(plotly_most_played_animated, use_container_width=True)
 
 
-
-
 st.markdown(
     """
 ---
-### Congratz, you made it to the end. Thanks for checking out my random random data. Heres a comic :tiger:. 
+### Congratz, you made it to the end. Thanks for checking out my random random data. Heres a comic :tiger:.
 """
 )
 

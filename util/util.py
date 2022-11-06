@@ -59,12 +59,11 @@ def get_top_tracks_df(data):
 
 
 def aquire_data_app():
-    """Streamlit page for aquiring new playlist data
+    """Streamlit page for aquiring new playlist data.
 
     Args:
 
     Returns:
-
     """
     scope = "playlist-read-private"
     st.title("Download data page")
@@ -110,9 +109,9 @@ def main_text_and_data_upload(state):
         st.info(
             """
             - Upload your csv file here. Maximum size is 200 Mb.
-            - 
-            - 
-            - 
+            -
+            -
+            -
         """
         )
         file_buffer = st.file_uploader("Upload your dataset below", type=["csv"])
@@ -167,7 +166,7 @@ def main_text_and_data_upload(state):
 
 @st.cache(show_spinner=False)
 def get_file_content_as_string(path):
-    """Get markdown file from repo and return as string"""
+    """Get markdown file from repo and return as string."""
     url = (
         "https://raw.githubusercontent.com/Strandgaard96/spotify-dashboard/master/"
         + path
@@ -177,8 +176,8 @@ def get_file_content_as_string(path):
 
 
 def download_file(file_path, EXTERNAL_DEPENDENCIES):
-    """
-    Downloads files specified by EXTERNAL_DEPENDENCIES to current directory.
+    """Downloads files specified by EXTERNAL_DEPENDENCIES to current directory.
+
     The keys are the filenames of the downloaded files.
     Args:
         file_path (str): Path to file to download

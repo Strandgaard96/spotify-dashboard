@@ -1,10 +1,8 @@
-name: spotify-dashboard
+name: conda_test
 channels:
   - conda-forge
-  - conda-forge/win-64
   - defaults
 dependencies:
-  - ipython
   - pip
   - pip:
     - streamlit
@@ -13,5 +11,7 @@ dependencies:
     - wordcloud
     - spotipy
     - scipy
+    - altair
+    - isort
   - python=3.10
   - plotly==5.7.0

@@ -1,4 +1,4 @@
-"""Spotifire
+"""Spotifire.
 
 This module runs a stand-alone streamlit data app that displays interactive analysis of
 my spotify data.
@@ -13,25 +13,25 @@ TODOs:
     * Module todos
 """
 import os
-from datetime import datetime
 from glob import glob
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-# For getting png image from remote
-from PIL import Image
 
 # Example data for debugging and development
 # from vega_datasets import data as data_vega
 # Get plotting utility
 from data import generate_wordcloud, get_genre_count, get_wordcloud_image
-from plotting import (get_altair_histogram, get_audiofeature_chart,
-                      get_audiofeature_distribution, get_streaming_barplot,
-                      get_temporal_distribution)
-from util.util import (aquire_data_app, download_file,
-                       get_file_content_as_string, get_playlist_df,
-                       get_top_tracks_df)
+from plotting import (
+    get_altair_histogram,
+    get_audiofeature_chart,
+    get_audiofeature_distribution,
+)
+from util.util import download_file, get_playlist_df, get_top_tracks_df
+
+# For getting png image from remote
+
 
 # Path to the repo image folder
 REPO_URL_ROOT = (
@@ -80,7 +80,7 @@ music_df = get_playlist_df(f"data/playlists/{playlist_name}.csv")
 st.title("Welcome to the audio feature analysis page :musical_note:")
 st.write(
     """
-    Here you will find different analysis and visualizations 
+    Here you will find different analysis and visualizations
     for the playlist selected in the sidebar :sunglasses:
     """
 )
@@ -138,14 +138,14 @@ st.markdown(
     """
 ---
 #### **Features explained:**
-There are a number of features and they can be defined like so: 
+There are a number of features and they can be defined like so:
 - **Danceability:** Measure of how suitable a track is for dancing.
 - **Acousticness:** Acousticness of track.
 - **Energy:** Measure of intensity and activity in track.
 - **Instrumentalness:** If the track contains no vocals.
 - **Liveness:** Detects presence of audience, eg. measures if the track was performed live.
 - **Loudness:** Loudness of track.
-- **Speechiness:** Measure the presence of spoken words in contrast to rapped/sung words.  
+- **Speechiness:** Measure the presence of spoken words in contrast to rapped/sung words.
 - **Valence:** Indicates how positive or happy a song is.
 
 Here you can select songs from the playlist below to see the distribution of features in the songs
@@ -204,7 +204,7 @@ st.markdown(
     """
 ---
 ### What are some more obscure genres in the playlist?
-Some genres only appear once, usually some very niche ones. 
+Some genres only appear once, usually some very niche ones.
 """
 )
 
@@ -216,7 +216,7 @@ st.markdown(
     """
 ---
 ### What is the audio feature distribution of the playlist?
-Here we see a Kernel Density Estimate (KDE) plot together with histograms for all of the audio 
+Here we see a Kernel Density Estimate (KDE) plot together with histograms for all of the audio
 features. Click the audio features on the right to remove/add them to the figure
 """
 )

@@ -1,6 +1,4 @@
-"""
-Module for doing playlist manipulations
-"""
+"""Module for doing playlist manipulations."""
 import json
 from collections import Counter, defaultdict
 from io import BytesIO
@@ -15,8 +13,7 @@ from wordcloud import WordCloud
 
 
 def get_genre_count(genres_df=None):
-    """
-    Utility method to extract genres from the dataframe into list
+    """Utility method to extract genres from the dataframe into list.
 
     Args:
         genres_df (DataFrame):
@@ -107,7 +104,8 @@ def generate_wordcloud(genres_df=None, playlist_name=None):
 
 @st.cache
 def get_wordcloud_image(playlist_name=None):
-    """Get wordcloud image from repo (which is cached by streamlit decorator)"""
+    """Get wordcloud image from repo (which is cached by streamlit
+    decorator)"""
     image = Image.open(f"data/playlists/{playlist_name}.png")
     return image
 
