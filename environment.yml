@@ -1,4 +1,4 @@
-name: conda_test
+name: spotify-dashboard
 channels:
   - conda-forge
   - defaults
@@ -13,5 +13,6 @@ dependencies:
     - scipy
     - altair
     - isort
+    - pre-commit
   - python=3.10
   - plotly==5.7.0
