@@ -19,7 +19,7 @@
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 [comment]: <> (Add link to streamlit)
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/strandgaard96/spotify-dashboard)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://spotifire.streamlit.app)
 
 <!-- PROJECT LOGO -->
 <br />
