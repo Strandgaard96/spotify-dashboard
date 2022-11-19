@@ -10,7 +10,6 @@ dependencies:
     - pandas
     - wordcloud
     - spotipy
-    - scipy
     - altair
     - isort
     - pre-commit
