@@ -6,7 +6,7 @@ from plotting import (
     get_streaming_barplot,
     get_temporal_distribution,
 )
-from streaming_data import get_streaming_df
+from streaming_data import get_streaming_df_remote
 
 # For getting png image from remote
 
@@ -40,7 +40,7 @@ Select the number of songs to show and a time range.
 """
 )
 
-df = get_streaming_df()
+df = get_streaming_df_remote()
 # Copy to be able to change the df. The original df is cached.
 streaming_df = df.copy()
 
@@ -76,14 +76,15 @@ st.markdown(
     """
 ---
 # Time based analysis :sunny: :cloud: :snowman: :umbrella:
-How did my listening evolve over the weaks/years/seasons?
+
+Here the streaming data is split into weaks/years/seasons.
 """
 )
 
 st.markdown("What is my all-time most listened monday song?!")
 
-col1, col2, col3, col4, _ = st.columns(5)
-time_range3 = col2.slider(
+col1, col2, _ = st.columns(3)
+time_range3 = col1.slider(
     "Select start-date",
     min_value=start_date,
     max_value=end_date,
@@ -91,7 +92,7 @@ time_range3 = col2.slider(
     format="DD/MM/YY",
     key="start",
 )
-time_range4 = col3.slider(
+time_range4 = col2.slider(
     "Select end-date",
     min_value=start_date,
     max_value=end_date,
@@ -100,7 +101,7 @@ time_range4 = col3.slider(
     key="end",
 )
 
-season = col4.selectbox(
+season = st.selectbox(
     "What season to filter on?", ("Winter", "Summer", "Spring", "Autumn", None)
 )
 

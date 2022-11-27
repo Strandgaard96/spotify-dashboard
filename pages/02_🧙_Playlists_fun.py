@@ -41,7 +41,6 @@ REPO_URL_ROOT = (
 # External files to download.
 EXTERNAL_DEPENDENCIES = {}
 
-
 st.set_page_config(page_title="Spotifire", layout="wide", page_icon=":fire:")
 
 # Download external dependencies.

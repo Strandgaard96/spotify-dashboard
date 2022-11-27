@@ -1,6 +1,8 @@
+import io
 from pathlib import Path
 
 import pandas as pd
+import requests
 import streamlit as st
 
 
@@ -66,8 +68,46 @@ def get_streaming_df():
     return df
 
 
+@st.cache
+def get_streaming_df_remote():
+    dtypes = {
+        "ms_played": "int",
+        "trackName": "str",
+        "artistName": "str",
+        "reason_start": "str",
+        "reason_end": "str",
+        "shuffle": "bool",
+        "skipped": "float",
+    }
+
+    # Username of your GitHub account
+
+    username = "Strandgaard96"
+
+    # Personal Access Token (PAO) from your GitHub account
+
+    token = st.secrets["GITHUB_TOKEN"]
+
+    # Creates a re-usable session object with your creds in-built
+    github_session = requests.Session()
+    github_session.auth = (username, token)
+
+    # Downloading the csv file from your GitHub
+    url = "https://raw.githubusercontent.com/Strandgaard96/data_files/master/total_streaming_data.csv"  # Make sure the url is the raw version of the file on GitHub
+    download = github_session.get(url).content
+
+    # Reading the downloaded content and making it a pandas dataframe
+    df = pd.read_csv(
+        io.StringIO(download.decode("utf-8")), dtype=dtypes, parse_dates=["endTime"]
+    )
+
+    return df
+
+
 if __name__ == "__main__":
 
+    df = get_streaming_df_remote()
+    print("lol")
     # Debugging stuff
     # df = pd.read_csv("data/total_streaming_data.csv", parse_dates=["endTime"])
 
