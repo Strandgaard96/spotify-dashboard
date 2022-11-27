@@ -175,7 +175,7 @@ def get_file_content_as_string(path):
     return response.read().decode("utf-8")
 
 
-def download_file(file_path, EXTERNAL_DEPENDENCIES):
+def download_file(file_path):
     """Downloads files specified by EXTERNAL_DEPENDENCIES to current directory.
 
     The keys are the filenames of the downloaded files.
