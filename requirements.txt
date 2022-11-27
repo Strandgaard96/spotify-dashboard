@@ -3,6 +3,7 @@ numpy
 pandas
 spotipy
 streamlit
+scipy
 matplotlib
 wordcloud
 plotly==5.7.0
