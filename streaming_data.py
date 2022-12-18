@@ -103,6 +103,7 @@ def get_streaming_df_remote():
     )
 
     df["endTime"] = df["endTime"].apply(pd.to_datetime)
+    print(df.columns)
 
     return df
 
