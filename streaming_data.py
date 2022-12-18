@@ -96,10 +96,13 @@ def get_streaming_df_remote():
     url = "https://raw.githubusercontent.com/Strandgaard96/data_files/master/total_streaming_data.csv"  # Make sure the url is the raw version of the file on GitHub
     download = github_session.get(url).content
 
+
     # Reading the downloaded content and making it a pandas dataframe
     df = pd.read_csv(
-        io.StringIO(download.decode("utf-8")), dtype=dtypes, parse_dates=["endTime"]
+        io.StringIO(download.decode("utf-8")), dtype=dtypes
     )
+
+    df[["endTime"]] = df[["endTime"]].apply(pd.to_datetime)
 
     return df
 
