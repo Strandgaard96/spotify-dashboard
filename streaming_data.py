@@ -40,8 +40,43 @@ def convert_stream_data():
     path = Path("data/playlists").rglob("*.csv")
     playlist_df = pd.concat((pd.read_csv(f) for f in path))
 
-    # stream_df.rename(columns={"trackName": "track_name"}, inplace=True)
+
+    return stream_df
+
+def convert_stream_data_update():
+    dtypes = {
+        "ms_played": "int",
+        "trackName": "str",
+        "artistName": "str",
+        "reason_start": "str",
+        "reason_end": "str",
+        "shuffle": "bool",
+        "skipped": "float",
+    }
+
+    path = Path("data/MyData_update").rglob("StreamingH*.json")
+    stream_df = pd.concat((pd.read_json(f, convert_dates='endTime', dtype=dtypes) for f in path))
+
+    stream_df.rename(
+        columns={
+            "msPlayed": "ms_played",
+        },
+        inplace=True,
+    )
+
+    original_df = pd.read_csv('data/total_streaming_data_pre2022.csv', parse_dates=["endTime"], dtype=dtypes)
     # total = pd.merge(stream_df, playlist_df, on='track_name')
+
+    # convert the 'Date' column to datetime format
+    stream_df['endTime'] =  pd.to_datetime(stream_df['endTime'])
+    original_df['endTime'] = pd.to_datetime(original_df['endTime'])
+
+    # Combine
+    combined = pd.concat([original_df,stream_df])
+
+    # Add timezone to the new rows. This is just set to zero. '
+    combined['endTime'] = pd.to_datetime(combined['endTime'], utc=True)
+    combined.to_csv("data/tmp.csv")
 
     return stream_df
 
@@ -68,7 +103,7 @@ def get_streaming_df():
     return df
 
 
-# @st.cache
+@st.cache
 def get_streaming_df_remote():
     dtypes = {
         "ms_played": "int",
@@ -76,7 +111,6 @@ def get_streaming_df_remote():
         "artistName": "str",
         "reason_start": "str",
         "reason_end": "str",
-        "shuffle": "bool",
         "skipped": "float",
     }
 
@@ -98,25 +132,19 @@ def get_streaming_df_remote():
 
     # Reading the downloaded content and making it a pandas dataframe
     df = pd.read_csv(
-        io.StringIO(download.decode("utf-8")),
-        dtype=dtypes,
+        io.StringIO(download.decode("utf-8")), dtype=dtypes, parse_dates=["endTime"],index_col=False
     )
-
-    df["endTime"] = pd.to_datetime(df["endTime"])
 
     return df
 
 
 if __name__ == "__main__":
-
-    df = get_streaming_df_remote()
-    print("lol")
-    # Debugging stuff
-    # df = pd.read_csv("data/total_streaming_data.csv", parse_dates=["endTime"])
-
-    # sorted_df = df.sort_values(by="endTime", ascending=True)
-    # one = sorted_df["endTime"].iloc[0]
-    # two = sorted_df["endTime"].iloc[-1]
-
-    # get_streaming_barplot(df, time_range=(one, two), range=50)
-    convert_stream_data()
+    dtypes = {
+        "ms_played": "int",
+        "trackName": "str",
+        "artistName": "str",
+        "reason_start": "str",
+        "reason_end": "str",
+        "skipped": "float",
+    }
+    convert_stream_data_update()
