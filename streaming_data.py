@@ -68,7 +68,7 @@ def get_streaming_df():
     return df
 
 
-# @st.cache
+@st.cache
 def get_streaming_df_remote():
     dtypes = {
         "ms_played": "int",
@@ -98,11 +98,8 @@ def get_streaming_df_remote():
 
     # Reading the downloaded content and making it a pandas dataframe
     df = pd.read_csv(
-        io.StringIO(download.decode("utf-8")),
-        dtype=dtypes,
+        io.StringIO(download.decode("utf-8")), dtype=dtypes, parse_dates=["endTime"]
     )
-
-    df["endTime"] = pd.to_datetime(df["endTime"])
 
     return df
 
