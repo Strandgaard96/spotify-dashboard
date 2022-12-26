@@ -62,12 +62,16 @@ def analyze_playlist(playlist_id, sp):
             playlist_features = {}
 
             # Get metadata
-            playlist_features["artist"] = track["track"]["artists"][0]["name"]
-            playlist_features["album"] = track["track"]["album"]["name"]
-            playlist_features["track_name"] = track["track"]["name"]
-            playlist_features["track_id"] = track["track"]["id"]
-            playlist_features["track_popularity"] = track["track"]["popularity"]
-            playlist_features["added_at"] = track["added_at"]
+            try:
+                playlist_features["artist"] = track["track"]["artists"][0]["name"]
+                playlist_features["album"] = track["track"]["album"]["name"]
+                playlist_features["track_name"] = track["track"]["name"]
+                playlist_features["track_id"] = track["track"]["id"]
+                playlist_features["track_popularity"] = track["track"]["popularity"]
+                playlist_features["added_at"] = track["added_at"]
+            except Exception as e:
+                print(e)
+                continue
 
             # Get audio features
             try:
@@ -157,7 +161,7 @@ def usage_analysis(sp, period="long_term"):
 def spotify_driver(playlist_id=None):
 
     # Define the scope. You ensure that only a part of the information can be accessed.
-    scope = "user-top-read"
+    """scope = "user-top-read"
 
     sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
@@ -172,7 +176,7 @@ def spotify_driver(playlist_id=None):
     # medium the last 6 months and short_term the last month.
     period = "short_term"
     top_tracks_df = usage_analysis(sp=sp, period=period)
-
+    """
     # Define new scope for playlist analysis
     scope = "playlist-read-private"
 
@@ -190,10 +194,12 @@ def spotify_driver(playlist_id=None):
 
     # Save dataframe
     playlist_df.to_csv(f"data/playlists/{playlist_name}.csv", index=False)
-    top_tracks_df.to_csv(f"data/user_data/top_tracks_{period}.csv", index=False)
+    # top_tracks_df.to_csv(f"data/user_data/top_tracks_{period}.csv", index=False)
 
 
 if __name__ == "__main__":
     # $ id = 3PDP5gjPxjiXfYbgf8ll9C
-    playlist_id = "3PDP5gjPxjiXfYbgf8ll9C"
+    # tec : 3vmJSGD3GyrWBdTrpNazPs
+
+    playlist_id = "3vmJSGD3GyrWBdTrpNazPs"
     spotify_driver(playlist_id=playlist_id)
