@@ -37,7 +37,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About
 I am trying to make a spotify data exploration app for fun.
-
+![image](./images/dashboard.png)
 
 
 ### Built with

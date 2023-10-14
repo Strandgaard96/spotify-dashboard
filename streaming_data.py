@@ -103,7 +103,7 @@ def get_streaming_df():
     return df
 
 
-@st.cache
+@st.cache_data
 def get_streaming_df_remote():
     dtypes = {
         "ms_played": "int",

@@ -159,7 +159,6 @@ def usage_analysis(sp, period="long_term"):
 
 
 def spotify_driver(playlist_id=None):
-
     # Define the scope. You ensure that only a part of the information can be accessed.
     """scope = "user-top-read"
 
