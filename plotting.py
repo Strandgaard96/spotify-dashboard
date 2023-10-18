@@ -242,8 +242,8 @@ def get_streaming_barplot(df=None, range=10, time_range=None):
 def get_most_played_animation(streaming_df=None):
 
     df = (
-        streaming_df.groupby([(streaming_df.endTime.dt.year), (streaming_df.trackName)])
-        .agg({"ms_played": "sum", "trackName": "count", "artistName": "first"})
+        streaming_df.groupby([streaming_df.endTime.dt.year, "trackName", "artistName"])
+        .agg({"ms_played": "sum", "trackName": "count"})
         .rename(columns={"trackName": "count"})
         .reset_index()
     )

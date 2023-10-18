@@ -146,6 +146,12 @@ def get_streaming_df():
 def get_streaming_df_remote():
     from st_files_connection import FilesConnection
 
+    sample = False
+    if sample:
+        df = get_streaming_df()
+        df = df[0:100]
+        return df
+
     dtypes = {
         "ms_played": "int",
         "trackName": "str",
