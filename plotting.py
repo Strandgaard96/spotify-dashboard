@@ -263,8 +263,8 @@ def get_most_played_animation(streaming_df=None):
         hover_data={"artistName": True},
         log_x=True,
         size_max=60,
-        range_y=[0, 200],
-        range_x=[10000, 25000000],
+        range_y=[0, 300],
+        range_x=[1000000, 45000000],
     )
 
     fig.update_layout(font=dict(size=16), showlegend=False, height=600)

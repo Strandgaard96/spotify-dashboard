@@ -43,7 +43,6 @@ def get_genre_count(genres_df=None):
 
     # Count how many times an artist contributes to genre and order according to highest.
     for elem in genre_artists:
-
         # For a genre, count the unique artists and their num entries
         genre_artists_count[elem] = Counter(genre_artists[elem])
 
@@ -102,7 +101,7 @@ def generate_wordcloud(genres_df=None, playlist_name=None):
     genre_wordcloud.to_file(f"data/playlists/{playlist_name}.png")
 
 
-@st.cache
+@st.cache_data
 def get_wordcloud_image(playlist_name=None):
     """Get wordcloud image from repo (which is cached by streamlit
     decorator)"""

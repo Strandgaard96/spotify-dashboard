@@ -9,14 +9,13 @@ from spotipy import SpotifyOAuth
 from spotify import spotify_driver
 
 
-@st.cache
+@st.cache_data
 def load_metadata(url):
     return pd.read_csv(url)
 
 
-@st.cache
+@st.cache_data
 def get_playlist_df(data):
-
     # Define the dtypes for columns to ensure correct format for later analysis
     dtypes = {
         "artist": "str",
@@ -44,9 +43,8 @@ def get_playlist_df(data):
     return df.set_index("track_name")
 
 
-@st.cache
+@st.cache_data
 def get_top_tracks_df(data):
-
     # Define the dtypes for columns to ensure correct format for later analysis
     dtypes = {
         "artist": "str",
@@ -104,7 +102,6 @@ def aquire_data_app():
 # Show main text and data upload section. Inspiration from: https://github.com/OmicEra/OmicLearn/blob/master/utils/ui_helper.py
 # TODO implement this functionality. OBS user upload data privacy issues!
 def main_text_and_data_upload(state):
-
     with st.expander("Upload or select sample dataset (*Required)", expanded=True):
         st.info(
             """
@@ -164,7 +161,7 @@ def main_text_and_data_upload(state):
     return state
 
 
-@st.cache(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def get_file_content_as_string(path):
     """Get markdown file from repo and return as string."""
     url = (

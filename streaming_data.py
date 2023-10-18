@@ -1,13 +1,10 @@
-import io
 from pathlib import Path
 
 import pandas as pd
-import requests
 import streamlit as st
 
 
 def convert_stream_data():
-
     path = Path("data/MyData").rglob("*endsong*.json")
     stream_df = pd.concat((pd.read_json(f, convert_dates=["ts"]) for f in path))
 
@@ -40,8 +37,8 @@ def convert_stream_data():
     path = Path("data/playlists").rglob("*.csv")
     playlist_df = pd.concat((pd.read_csv(f) for f in path))
 
-
     return stream_df
+
 
 def convert_stream_data_update():
     dtypes = {
@@ -55,7 +52,9 @@ def convert_stream_data_update():
     }
 
     path = Path("data/MyData_update").rglob("StreamingH*.json")
-    stream_df = pd.concat((pd.read_json(f, convert_dates='endTime', dtype=dtypes) for f in path))
+    stream_df = pd.concat(
+        (pd.read_json(f, convert_dates="endTime", dtype=dtypes) for f in path)
+    )
 
     stream_df.rename(
         columns={
@@ -64,24 +63,26 @@ def convert_stream_data_update():
         inplace=True,
     )
 
-    original_df = pd.read_csv('data/total_streaming_data_pre2022.csv', parse_dates=["endTime"], dtype=dtypes)
+    original_df = pd.read_csv(
+        "data/total_streaming_data_pre2023.csv", parse_dates=["endTime"], dtype=dtypes
+    )
     # total = pd.merge(stream_df, playlist_df, on='track_name')
 
     # convert the 'Date' column to datetime format
-    stream_df['endTime'] =  pd.to_datetime(stream_df['endTime'])
-    original_df['endTime'] = pd.to_datetime(original_df['endTime'])
+    stream_df["endTime"] = pd.to_datetime(stream_df["endTime"])
+    original_df["endTime"] = pd.to_datetime(original_df["endTime"])
 
     # Combine
-    combined = pd.concat([original_df,stream_df])
+    combined = pd.concat([original_df, stream_df])
 
     # Add timezone to the new rows. This is just set to zero. '
-    combined['endTime'] = pd.to_datetime(combined['endTime'], utc=True)
+    combined["endTime"] = pd.to_datetime(combined["endTime"], utc=True)
     combined.to_csv("data/tmp.csv")
 
     return stream_df
 
 
-@st.cache
+@st.cache_data
 def get_streaming_df():
     data = Path("data/total_streaming_data.csv")
     if data.is_file():
@@ -103,42 +104,74 @@ def get_streaming_df():
     return df
 
 
-@st.cache_data
+# Old version
+# @st.cache_data
+# def get_streaming_df_remote():
+#     dtypes = {
+#         "ms_played": "int",
+#         "trackName": "str",
+#         "artistName": "str",
+#         "reason_start": "str",
+#         "reason_end": "str",
+#         "skipped": "float",
+#     }
+#
+#     # Username of your GitHub account
+#
+#     username = "Strandgaard96"
+#
+#     # Personal Access Token (PAO) from your GitHub account
+#
+#     token = st.secrets["GITHUB_TOKEN"]
+#
+#     # Creates a re-usable session object with your creds in-built
+#     github_session = requests.Session()
+#     github_session.auth = (username, token)
+#
+#     # Downloading the csv file from your GitHub
+#     url = "https://raw.githubusercontent.com/Strandgaard96/data_files/master/total_streaming_data.csv"  # Make sure the url is the raw version of the file on GitHub
+#     download = github_session.get(url).content
+#
+#     # Reading the downloaded content and making it a pandas dataframe
+#     df = pd.read_csv(
+#         io.StringIO(download.decode("utf-8")),
+#         dtype=dtypes,
+#         parse_dates=["endTime"],
+#         index_col=False,
+#     )
+#
+#     return df
+
+
 def get_streaming_df_remote():
+    from st_files_connection import FilesConnection
+
     dtypes = {
         "ms_played": "int",
         "trackName": "str",
         "artistName": "str",
         "reason_start": "str",
         "reason_end": "str",
+        "shuffle": "bool",
         "skipped": "float",
     }
 
-    # Username of your GitHub account
-
-    username = "Strandgaard96"
-
-    # Personal Access Token (PAO) from your GitHub account
-
-    token = st.secrets["GITHUB_TOKEN"]
-
-    # Creates a re-usable session object with your creds in-built
-    github_session = requests.Session()
-    github_session.auth = (username, token)
-
-    # Downloading the csv file from your GitHub
-    url = "https://raw.githubusercontent.com/Strandgaard96/data_files/master/total_streaming_data.csv"  # Make sure the url is the raw version of the file on GitHub
-    download = github_session.get(url).content
-
-    # Reading the downloaded content and making it a pandas dataframe
-    df = pd.read_csv(
-        io.StringIO(download.decode("utf-8")), dtype=dtypes, parse_dates=["endTime"],index_col=False
+    # Create connection object and retrieve file contents.
+    # Specify input format is a csv and to cache the result for 600 seconds.
+    conn = st.experimental_connection("gcs", type=FilesConnection)
+    df = conn.read(
+        "bucket_total_streaming_data/total_streaming_data.csv",
+        input_format="csv",
+        ttl=600,
+        parse_dates=["endTime"],
+        dtype=dtypes,
     )
 
     return df
 
 
 if __name__ == "__main__":
+    test = get_streaming_google_cloud()
     dtypes = {
         "ms_played": "int",
         "trackName": "str",

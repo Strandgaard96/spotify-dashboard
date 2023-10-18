@@ -57,7 +57,9 @@ def analyze_playlist(playlist_id, sp):
         playlist = sp.playlist_items(playlist_id=playlist_id, limit=100, offset=offset)[
             "items"
         ]
-        for track in playlist:
+        for i, track in enumerate(playlist):
+            if i % 100 == 0:
+                print(f"Processed offset {offset}, total tracks:{playlist_length}")
             # Create empty dict for holding extracted features
             playlist_features = {}
 
@@ -200,5 +202,5 @@ if __name__ == "__main__":
     # $ id = 3PDP5gjPxjiXfYbgf8ll9C
     # tec : 3vmJSGD3GyrWBdTrpNazPs
 
-    playlist_id = "3vmJSGD3GyrWBdTrpNazPs"
+    playlist_id = "3PDP5gjPxjiXfYbgf8ll9C"
     spotify_driver(playlist_id=playlist_id)

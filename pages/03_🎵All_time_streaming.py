@@ -8,6 +8,8 @@ from plotting import (
 )
 from streaming_data import get_streaming_df_remote
 
+THEME = None
+
 # For getting png image from remote
 
 
@@ -40,6 +42,7 @@ Select the number of songs to show and a time range.
 """
 )
 
+# df = get_streaming_df()
 df = get_streaming_df_remote()
 # Copy to be able to change the df. The original df is cached.
 streaming_df = df.copy()
@@ -116,7 +119,7 @@ st.markdown(
     """
 ---
 # Most played as function of year
-I am questioning how useful this visualization is, but i made so here it is.
+I am questioning how useful this visualization is, but I made it so here it is.
 """
 )
 
