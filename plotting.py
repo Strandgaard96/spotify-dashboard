@@ -54,7 +54,12 @@ def get_altair_histogram(data=None, genre_artists_count=None, **plt_kwargs):
         .encode(
             x=alt.X(
                 "genre",
-                axis=alt.Axis(title="Genre"),
+                axis=alt.Axis(
+                    title="Genre",
+                    values=buffer["genre"].tolist(),
+                    labelOverlap=False,  # This prevents altair from removing tick labels on categorical plots
+                    labelLimit=250,
+                ),
                 sort=alt.EncodingSortField(order="ascending"),
             ),
             y=alt.Y(
@@ -66,9 +71,9 @@ def get_altair_histogram(data=None, genre_artists_count=None, **plt_kwargs):
             tooltip=alt.Tooltip("artists", title="title"),
         )
         .properties(
-            width=200, height=500, title=plt_kwargs.get("title", "Genre histogram")
+            width=800, height=500, title=plt_kwargs.get("title", "Genre histogram")
         )
-        .configure_axis(labelFontSize=20, titleFontSize=20, labelAngle=-45)
+        .configure_axis(labelFontSize=18, titleFontSize=20, labelAngle=-45)
         .configure_title(
             fontSize=20,
         )
@@ -132,7 +137,7 @@ def get_audiofeature_distribution(df, **plt_kwargs):
         bin_size=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05],
     )
     fig.update_layout(
-        title_text="Audio feature KDE plot", width=700, height=700, font=dict(size=16)
+        title_text="Audio feature KDE plot", width=900, height=900, font=dict(size=24)
     )
 
     return fig

@@ -130,7 +130,7 @@ st.plotly_chart(plotly_most_played_animated, use_container_width=True)
 st.markdown(
     """
 ---
-### Congratz, you made it to the end. Thanks for checking out my random random data. Heres a comic :tiger:.
+### Congratz, you made it to the end. Thanks for checking out my random random data. Heres a comic :tiger:
 """
 )
 

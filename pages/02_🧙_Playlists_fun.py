@@ -12,6 +12,7 @@ Example:
 TODOs:
     * Module todos
 """
+
 import os
 from glob import glob
 from pathlib import Path
@@ -196,7 +197,7 @@ df_smallest = (
 
 # Get altair object
 chart_genre_hist = get_altair_histogram(
-    df_smallest, genre_artists_count, domain=[0, 2], title="Low count genres"
+    df_smallest, genre_artists_count, domain=[0, 1], title="Low count genres"
 )
 
 st.markdown(
