@@ -176,7 +176,7 @@ else:
 
 # Print both obtained charts
 main_col1, main_col2 = st.columns([1, 1])
-main_col1.altair_chart(chart_features, use_container_width=True)
+main_col1.altair_chart(chart_features, use_container_width=True, theme=None)
 main_col2.altair_chart(chart_genre_hist, use_container_width=True)
 
 # Print wordcloud analysis
@@ -223,7 +223,7 @@ features. Click the audio features on the right to remove/add them to the figure
 audio_feature_distribution_chart = get_audiofeature_distribution(
     music_df[audio_features]
 )
-st.plotly_chart(audio_feature_distribution_chart, use_container_width=True)
+st.plotly_chart(audio_feature_distribution_chart, use_container_width=True, theme=None)
 
 # Time based analysis
 top_tracks_df = get_top_tracks_df

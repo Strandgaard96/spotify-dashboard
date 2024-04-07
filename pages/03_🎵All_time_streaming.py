@@ -73,7 +73,7 @@ time_range2 = col3.slider(
 stream_plotly = get_streaming_barplot(
     df=streaming_df, range=range, time_range=(time_range1, time_range2)
 )
-st.plotly_chart(stream_plotly, use_container_width=True)
+st.plotly_chart(stream_plotly, use_container_width=True, theme=None)
 
 st.markdown(
     """
@@ -112,7 +112,7 @@ temporal_plotly = get_temporal_distribution(
     df=streaming_df, time_range=(time_range3, time_range4), season=season
 )
 
-st.plotly_chart(temporal_plotly, use_container_width=True)
+st.plotly_chart(temporal_plotly, use_container_width=True, theme=None)
 
 
 st.markdown(
@@ -124,7 +124,7 @@ I am questioning how useful this visualization is, but I made it so here it is.
 )
 
 plotly_most_played_animated = get_most_played_animation(streaming_df=streaming_df)
-st.plotly_chart(plotly_most_played_animated, use_container_width=True)
+st.plotly_chart(plotly_most_played_animated, use_container_width=True, theme=None)
 
 
 st.markdown(

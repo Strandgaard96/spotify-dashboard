@@ -164,7 +164,7 @@ def get_streaming_df_remote():
 
     # Create connection object and retrieve file contents.
     # Specify input format is a csv and to cache the result for 600 seconds.
-    conn = st.experimental_connection("gcs", type=FilesConnection)
+    conn = st.connection("gcs", type=FilesConnection)
     df = conn.read(
         "bucket_total_streaming_data/total_streaming_data.csv",
         input_format="csv",

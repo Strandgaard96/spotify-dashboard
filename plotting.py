@@ -137,7 +137,11 @@ def get_audiofeature_distribution(df, **plt_kwargs):
         bin_size=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05],
     )
     fig.update_layout(
-        title_text="Audio feature KDE plot", width=900, height=900, font=dict(size=24)
+        title_text="Audio feature KDE plot",
+        width=900,
+        height=900,
+        font=dict(size=24),
+        plot_bgcolor="#f4f3f2",
     )
 
     return fig
@@ -196,12 +200,19 @@ def get_temporal_distribution(df, time_range=None, season=None, **plt_kwargs):
             y="size",
             hover_data=["trackName", "artistName"],
             color="size",
+            color_continuous_scale=px.colors.sequential.Inferno,
             labels={"size": "Plays", "trackName": "Track name"},
             height=600,
         )
         fig.add_trace(temp_fig.data[0], row=row, col=col)
 
-    fig.update_layout(font=dict(size=16), showlegend=False, height=800)
+    fig.update_layout(
+        font=dict(size=20),
+        showlegend=False,
+        height=1000,
+        plot_bgcolor="#f4f3f2",
+        # horizontal_spacing=0.25,
+    )
 
     # options
     # coloraxis=dict(colorscale='Bluered_r'),
@@ -234,10 +245,17 @@ def get_streaming_barplot(df=None, range=10, time_range=None):
         y="size",
         hover_data=["trackName", "artistName"],
         color="size",
+        color_continuous_scale=px.colors.sequential.Inferno,
         labels={"size": "Plays", "trackName": "Track Name"},
         height=600,
     )
-    fig.update_layout(font=dict(size=16))
+    fig.update_layout(
+        height=600,
+        font=dict(size=18),
+        plot_bgcolor="#f4f3f2",
+        xaxis={"automargin": True},
+        yaxis={"automargin": True},
+    )
     # Here are two ways of showing the figure
     # show(fig)
     # fig.show()
@@ -272,6 +290,10 @@ def get_most_played_animation(streaming_df=None):
         range_x=[1000000, 45000000],
     )
 
-    fig.update_layout(font=dict(size=16), showlegend=False, height=600)
+    fig.update_layout(
+        font=dict(size=22),
+        showlegend=False,
+        height=600,
+    )
 
     return fig
