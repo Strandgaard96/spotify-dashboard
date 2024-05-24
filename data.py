@@ -1,4 +1,5 @@
 """Module for doing playlist manipulations."""
+
 import json
 from collections import Counter, defaultdict
 from io import BytesIO
@@ -110,6 +111,11 @@ def get_wordcloud_image(playlist_name=None):
 
 
 def get_comic():
+    """Get the latest xkcd comic.
+
+    Returns:
+        img
+    """
     try:
         with requests.Session() as s:
             content = s.get("https://xkcd.com/info.0.json").content.decode()
@@ -129,6 +135,4 @@ def get_comic():
                 img = Image.open(BytesIO(res.content))
     except requests.ConnectionError:
         img = Image.open("data/comic.png")
-        # error_image = Image.open("assets/xkcd_404.jpg")
-        # error_image.show()
     return img
