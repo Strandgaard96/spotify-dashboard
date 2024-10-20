@@ -1,11 +1,11 @@
 altair==4.1.0
 numpy
 pandas
-spotipy
-streamlit
+spotipy==2.19.0
+streamlit==1.39
 scipy
 matplotlib
 wordcloud
-plotly==5.7.0
+plotly
 gcsfs
 st_files_connection
